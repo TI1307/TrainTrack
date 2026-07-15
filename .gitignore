@@ -14,6 +14,7 @@ mobile/.expo/
 mobile/dist/
 mobile/web-build/
 mobile/expo-env.d.ts
+mobile/.env
 
 # Native
 mobile/.kotlin/
