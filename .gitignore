@@ -8,8 +8,39 @@ backend/.env
 frontend/node_modules/
 frontend/dist/
 
-# React Native
+# React Native (Expo)
 mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
+mobile/expo-env.d.ts
+
+# Native
+mobile/.kotlin/
+mobile/*.orig.*
+mobile/*.jks
+mobile/*.p8
+mobile/*.p12
+mobile/*.key
+mobile/*.mobileprovision
+
+# Metro
+mobile/.metro-health-check*
+
+# Debug
+mobile/npm-debug.*
+mobile/yarn-debug.*
+mobile/yarn-error.*
+
+# Local environment
+mobile/.env*.local
+
+# TypeScript
+mobile/*.tsbuildinfo
+
+# Generated native folders
+mobile/ios/
+mobile/android/
 
 # IDE
 .vscode/
