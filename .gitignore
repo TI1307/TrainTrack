@@ -4,9 +4,18 @@ backend/__pycache__/
 backend/*.pyc
 backend/.env
 
-# React
+# React (frontend)
 frontend/node_modules/
 frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/lerna-debug.log*
+frontend/logs
+frontend/*.log
 
 # React Native (Expo)
 mobile/node_modules/
@@ -44,8 +53,14 @@ mobile/ios/
 mobile/android/
 
 # IDE
-.vscode/
+.vscode/*
+!.vscode/extensions.json
 .idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 # OS
 .DS_Store
