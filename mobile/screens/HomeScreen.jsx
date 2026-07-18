@@ -75,6 +75,8 @@ export default function HomeScreen({ onSearch }) {
 
   return (
     <Pressable style={styles.container} onPress={() => setActiveField(null)}>
+<Image source={require("../assets/rail-top-left.png")} style={styles.railTopLeft} />
+<Image source={require("../assets/rail-bottom-right.png")} style={styles.railBottomRight} />
       <View style={styles.card}>
         <Image
           source={require("../assets/trainlogo-transparent.png")}
@@ -245,7 +247,12 @@ export default function HomeScreen({ onSearch }) {
           </Pressable>
         </Modal>
 
-        <Pressable style={styles.button} onPress={onSearch}>
+        <Pressable style={styles.button} 
+        onPress={ () => onSearch({
+          from:fromSearch,
+          to:toSearch,
+          date:days[selectedDayIndex].date,
+        })}>
           <Text style={styles.buttonText}>إبحث</Text>
         </Pressable>
       </View>
@@ -387,4 +394,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
   },
+  railTopLeft: {
+  position: "absolute",
+  top: 0,
+  left: 0,
+},
+railBottomRight: {
+  position: "absolute",
+  bottom: 0,
+  right: 0,
+},
 });
