@@ -3,7 +3,7 @@ backend/.venv/
 backend/__pycache__/
 backend/*.pyc
 backend/.env
-
+backend/*.db
 # React (frontend)
 frontend/node_modules/
 frontend/dist/
