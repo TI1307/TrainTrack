@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine , event
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
 DATABASE_URL = "sqlite:///./traintrack.db"
@@ -17,3 +17,10 @@ def get_db():
         yield db # when the router call it it will freeze in this line until a responce sent , and the close connection 
     finally:
         db.close()
+
+# run this whenever  connection is set , and apply foreign Key Rules ( assign non existing foreign key , or delete a record in main table )
+@event.listens_for(engine, "connect")
+def enable_foreign_keys(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
