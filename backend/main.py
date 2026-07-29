@@ -1,6 +1,10 @@
-def main():
-    print("Hello from backend!")
+from fastapi import FastAPI
+from routers import stations
 
+app = FastAPI(title="TrainTrack API")
 
-if __name__ == "__main__":
-    main()
+app.include_router(stations.router)
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
