@@ -41,7 +41,7 @@ class Station(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
     latitude: Mapped[float] = mapped_column()
-    Longitude: Mapped[float] = mapped_column()
+    longitude: Mapped[float] = mapped_column()
     wilaya_id: Mapped[int] = mapped_column(ForeignKey("Wilaya.id"))
 
     wilaya: Mapped["Wilaya"] = relationship(back_populates="stations")
