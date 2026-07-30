@@ -8,6 +8,11 @@ class AdminRole(str, enum.Enum):
     super_admin = "super_admin"
     admin = "admin"
     
+class AccountStatus(str, enum.Enum):
+    pending="pending"
+    active="active"
+    disabled="disabled"
+    
 class TripType(str, enum.Enum):
     inter_Wilaya = "inter_Wilaya"
     intra_Wilaya = "intra_Wilaya"
@@ -146,7 +151,11 @@ class Ticket(Base):
 class Admin(Base):
     __tablename__ = "Admin"
     id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(unique=True)
     username: Mapped[str] = mapped_column()
-    password_hash: Mapped[str] = mapped_column()
+    password_hash: Mapped[str] = mapped_column(nullable=True)
     role: Mapped[AdminRole] = mapped_column(SqlEnum(AdminRole), default=AdminRole.admin)
+    status: Mapped[AccountStatus]=mapped_column(SqlEnum(AccountStatus), default=AccountStatus.pending)
+    invite_token_hash :Mapped[str] = mapped_column(nullable=True)
+    invite_token_expires_at :Mapped[datetime] = mapped_column(nullable=True)
     created_at: Mapped[datetime] = mapped_column()
