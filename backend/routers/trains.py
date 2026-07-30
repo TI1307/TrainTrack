@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from database import get_db
 import models
 from schemas.train import TrainCreate, TrainRead
+from routers.auth import get_current_admin
+
 
 router = APIRouter(prefix="/trains", tags=["trains"])
 
@@ -21,7 +23,7 @@ def get_train(train_id: int, db: Session = Depends(get_db)):
 
 # POST  /trains
 @router.post("/", response_model=TrainRead)
-def create_train(train: TrainCreate, db: Session = Depends(get_db)):
+def create_train(train: TrainCreate, db: Session = Depends(get_db), current_admin: models.Admin = Depends(get_current_admin)):
     new_train = models.Train(serial_number=train.serial_number)
     db.add(new_train)
     db.commit()
@@ -31,7 +33,7 @@ def create_train(train: TrainCreate, db: Session = Depends(get_db)):
 
 # PUT  /trains{id}
 @router.put("/{train_id}", response_model=TrainRead)
-def update_train(train_id: int, updated: TrainCreate, db: Session = Depends(get_db)):
+def update_train(train_id: int, updated: TrainCreate, db: Session = Depends(get_db), current_admin: models.Admin = Depends(get_current_admin)):
     train = db.query(models.Train).filter(models.Train.id == train_id).first()
     if not train:
         raise HTTPException(status_code=404, detail="Train not found")
@@ -43,7 +45,7 @@ def update_train(train_id: int, updated: TrainCreate, db: Session = Depends(get_
 
 # DELETE  /trains{id}
 @router.delete("/{train_id}")
-def delete_train(train_id: int, db: Session = Depends(get_db)):
+def delete_train(train_id: int, db: Session = Depends(get_db), current_admin: models.Admin = Depends(get_current_admin)):
     train = db.query(models.Train).filter(models.Train.id == train_id).first()
     if not train:
         raise HTTPException(status_code=404, detail="Train not found")

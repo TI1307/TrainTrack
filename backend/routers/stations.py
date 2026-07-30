@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from database import get_db
 import models
 from schemas.station import StationCreate , StationRead
+from routers.auth import get_current_admin
+
 
 router =APIRouter(prefix="/stations",tags=["stations"])
 
@@ -25,7 +27,7 @@ def get_station(station_id : int , db : Session = Depends(get_db)):
 
 # POST /station
 @router.post("/",response_model=StationRead)
-def create_station(station :StationCreate, db : Session =Depends(get_db)):
+def create_station(station :StationCreate, db : Session =Depends(get_db), current_admin: models.Admin = Depends(get_current_admin)):
     new_station = models.Station(  
     name=station.name,
     latitude=station.latitude,
@@ -41,7 +43,7 @@ def create_station(station :StationCreate, db : Session =Depends(get_db)):
 
 # PUT /station/{id}
 @router.put("/{station_id}",response_model=StationRead)
-def update_station(station_id: int ,updated : StationCreate, db : Session = Depends(get_db)):
+def update_station(station_id: int ,updated : StationCreate, db : Session = Depends(get_db), current_admin: models.Admin = Depends(get_current_admin)):
     station=db.query(models.Station).filter(models.Station.id==station_id).first()
     if not station :
         raise HTTPException( status_code =404 , detail="Station Not found")
@@ -59,7 +61,7 @@ def update_station(station_id: int ,updated : StationCreate, db : Session = Depe
 
 # DELETE /station/{id}
 @router.delete("/{station_id}")
-def delete_station(station_id : int ,db :Session =Depends(get_db)):
+def delete_station(station_id : int ,db :Session =Depends(get_db) , current_admin: models.Admin = Depends(get_current_admin)):
     station=db.query(models.Station).filter(models.Station.id == station_id).first()
     if not station :
         raise HTTPException(status_code=404,detail="Station Not Found")
