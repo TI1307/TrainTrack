@@ -4,7 +4,10 @@ from datetime import datetime, time
 import enum
 from database import Base
 
-
+class AdminRole(str, enum.Enum):
+    super_admin = "super_admin"
+    admin = "admin"
+    
 class TripType(str, enum.Enum):
     inter_Wilaya = "inter_Wilaya"
     intra_Wilaya = "intra_Wilaya"
@@ -145,4 +148,5 @@ class Admin(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column()
     password_hash: Mapped[str] = mapped_column()
+    role: Mapped[AdminRole] = mapped_column(SqlEnum(AdminRole), default=AdminRole.admin)
     created_at: Mapped[datetime] = mapped_column()
