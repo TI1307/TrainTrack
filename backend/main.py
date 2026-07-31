@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import stations , trains ,auth , wilayas
+from routers import stations , trains ,auth , wilayas , admin_users
 
 app = FastAPI(title="TrainTrack API")
 
@@ -7,6 +7,7 @@ app.include_router(stations.router)
 app.include_router(trains.router)
 app.include_router(auth.router)
 app.include_router(wilayas.router)
+app.include_router(admin_users.router)
 
 @app.get("/health")
 def health():

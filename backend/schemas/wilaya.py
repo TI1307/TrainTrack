@@ -9,5 +9,5 @@ class wilayaRead (BaseModel):
     id :int 
     name:str
 
-    class config:
+    class Config:
             from_attributes = True
