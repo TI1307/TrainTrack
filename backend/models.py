@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime, time
 import enum
 from database import Base
+from datetime import timezone , datetime
 
 class AdminRole(str, enum.Enum):
     super_admin = "super_admin"
@@ -158,4 +159,4 @@ class Admin(Base):
     status: Mapped[AccountStatus]=mapped_column(SqlEnum(AccountStatus), default=AccountStatus.pending)
     invite_token_hash :Mapped[str] = mapped_column(nullable=True)
     invite_token_expires_at :Mapped[datetime] = mapped_column(nullable=True)
-    created_at: Mapped[datetime] = mapped_column()
+    created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))

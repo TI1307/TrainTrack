@@ -34,7 +34,8 @@ async def create_admin (admin :adminCreate , db: Session=Depends(get_db) ,curren
         role="admin"  ,
         status="pending",
         invite_token_hash=hash_invite_token (raw_token) ,
-        invite_token_expires_at= get_invite_expiry ()
+        invite_token_expires_at= get_invite_expiry (),
+        created_at = datetime.now(timezone.utc)
     )
     db.add(admin)
     db.commit()
