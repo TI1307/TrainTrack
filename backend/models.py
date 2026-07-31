@@ -64,8 +64,8 @@ class Line(Base):
     length: Mapped[float] = mapped_column()
 
     trips: Mapped[list["Trip"]] = relationship(back_populates="line")
-    notices: Mapped[list["Notice"]] = relationship(back_populates="line")
-    line_geometries: Mapped[list["Line_Geometry"]] = relationship(back_populates="line")
+    notices: Mapped[list["Notice"]] = relationship(back_populates="line" ,  cascade="all, delete-orphan")
+    line_geometries: Mapped[list["Line_Geometry"]] = relationship(back_populates="line" , cascade="all, delete-orphan")
 
 
 class Line_Geometry(Base):
@@ -76,7 +76,7 @@ class Line_Geometry(Base):
     latitude: Mapped[float] = mapped_column()
     longitude: Mapped[float] = mapped_column()
 
-    line: Mapped["Line"] = relationship(back_populates="line_geometries")
+    line: Mapped["Line"] = relationship(back_populates="line_geometries" )
 
 
 class Trip(Base):
@@ -89,9 +89,9 @@ class Trip(Base):
 
     line: Mapped["Line"] = relationship(back_populates="trips")
     train: Mapped["Train"] = relationship(back_populates="trips")
-    schedulers: Mapped[list["Scheduler"]] = relationship(back_populates="trip")
-    notices: Mapped[list["Notice"]] = relationship(back_populates="trip")
-    vehicle_postions: Mapped[list["Vehicle_postion"]] = relationship(back_populates="trip")
+    schedulers: Mapped[list["Scheduler"]] = relationship(back_populates="trip" ,cascade="all, delete-orphan")
+    notices: Mapped[list["Notice"]] = relationship(back_populates="trip" ,cascade="all, delete-orphan")
+    vehicle_postions: Mapped[list["Vehicle_postion"]] = relationship(back_populates="trip" ,cascade="all, delete-orphan")
 
 
 class Scheduler(Base):
@@ -116,7 +116,7 @@ class Notice(Base):
     message: Mapped[str] = mapped_column()
     created_at: Mapped[datetime] = mapped_column()
 
-    line: Mapped["Line"] = relationship(back_populates="notices")
+    line: Mapped["Line"] = relationship(back_populates="notices" )
     station: Mapped["Station"] = relationship(back_populates="notices")
     trip: Mapped["Trip"] = relationship(back_populates="notices")
 
