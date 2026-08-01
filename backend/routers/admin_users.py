@@ -50,7 +50,7 @@ async def create_admin (admin :adminCreate , db: Session=Depends(get_db) ,curren
 def create_password (admin :adminPasswordCreate , db: Session=Depends(get_db) ):
     invite_token_hash=hash_invite_token (admin.token) 
     update_admin=db.query(models.Admin).filter(models.Admin.invite_token_hash==invite_token_hash).first()
-    if   not update_admin or update_admin.invite_token_expires_at < datetime.now (timezone.utc) :
+    if   not update_admin or update_admin.invite_token_expires_at < datetime.now (timezone.utc).replace(tzinfo=None) :
         raise HTTPException (status_code=409 , detail="Invalid or expired invite token")
 
     update_admin.status="active"
