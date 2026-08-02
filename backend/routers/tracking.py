@@ -43,38 +43,7 @@ def get_live_trains(
     return results
 
 
-# GET /tracking/{trip_id} — single-trip detail, e.g. when the user taps one train
-@router.get("/{trip_id}", response_model=TrackingRead)
-def get_trip_position(trip_id: int, db: Session = Depends(get_db)):
-    trip = db.query(models.Trip).filter(models.Trip.id == trip_id).first()
-    if not trip:
-        raise HTTPException(status_code=404, detail="هذه الرحلة غير موجودة")
 
-    schedulers = db.query(models.Scheduler).filter(models.Scheduler.trip_id == trip_id).all()
-    if not schedulers:
-        raise HTTPException(status_code=404, detail="لا يوجد جدول زمني لهذه الرحلة")
-
-    leg = find_current_leg(schedulers, datetime.now().time())
-
-    if leg["status"] in ("not_started", "completed"):
-        station = db.query(models.Station).filter(models.Station.id == leg["at_station_id"]).first()
-        return TrackingRead(trip_id=trip_id, status=leg["status"], latitude=station.latitude, longitude=station.longitude)
-
-    try:
-        from_dist = get_station_distance(db, trip.line_id, leg["from_station_id"])
-        to_dist = get_station_distance(db, trip.line_id, leg["to_station_id"])
-        target = from_dist + leg["fraction"] * (to_dist - from_dist)
-        lat, lon = interpolate_position(db, trip.line_id, target)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-    return TrackingRead(
-        trip_id=trip_id, status="in_progress",
-        from_station_id=leg["from_station_id"], to_station_id=leg["to_station_id"],
-        progress_percent=round(leg["fraction"] * 100, 1), latitude=lat, longitude=lon,
-    )
-
-    # routers/tracking.py — new endpoint
 @router.get("/{trip_id}/path", response_model=list[StopStatus])
 def get_trip_path(trip_id: int, db: Session = Depends(get_db)):
     trip = db.query(models.Trip).filter(models.Trip.id == trip_id).first()
