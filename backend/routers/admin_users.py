@@ -51,7 +51,7 @@ def create_password (admin :adminPasswordCreate , db: Session=Depends(get_db) ):
     invite_token_hash=hash_invite_token (admin.token) 
     update_admin=db.query(models.Admin).filter(models.Admin.invite_token_hash==invite_token_hash).first()
     if   not update_admin or update_admin.invite_token_expires_at < datetime.now (timezone.utc).replace(tzinfo=None) :
-        raise HTTPException (status_code=409 , detail="Invalid or expired invite token")
+        raise HTTPException (status_code=409 , detail="رمز الدعوة غير صالح أو انتهت صلاحيته")
 
     update_admin.status="active"
     update_admin.password_hash =hash_password (admin.new_password)

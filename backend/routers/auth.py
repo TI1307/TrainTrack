@@ -16,7 +16,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     admin = db.query(models.Admin).filter(models.Admin.username == form_data.username).first()
     if not admin or not verify_password(form_data.password, admin.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="اسم المستخدم أو كلمة المرور غير صحيحة")
     token = create_access_token({"sub": admin.username})
     return {"access_token": token, "token_type": "bearer"}
 
@@ -24,7 +24,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     unauthorized = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
+        detail="لا يمكن التحقق من بيانات الاعتماد",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
@@ -42,7 +42,7 @@ def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = Depends
 
 def require_super_admin(current_admin: models.Admin = Depends(get_current_admin)):
     if current_admin.role != models.AdminRole.super_admin:
-        raise HTTPException(status_code=403, detail="Super admin access required")
+        raise HTTPException(status_code=403, detail="تتطلب صلاحية المشرف الأعلى")
     return current_admin
 
 

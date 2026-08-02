@@ -18,7 +18,7 @@ def get_trains(db: Session = Depends(get_db)):
 def get_train(train_id: int, db: Session = Depends(get_db)):
     train = db.query(models.Train).filter(models.Train.id == train_id).first()
     if not train:
-        raise HTTPException(status_code=404, detail="Train not found")
+        raise HTTPException(status_code=404, detail="القطار غير موجود")
     return train
 
 # POST  /trains
@@ -36,7 +36,7 @@ def create_train(train: TrainCreate, db: Session = Depends(get_db), current_admi
 def update_train(train_id: int, updated: TrainCreate, db: Session = Depends(get_db), current_admin: models.Admin = Depends(get_current_admin)):
     train = db.query(models.Train).filter(models.Train.id == train_id).first()
     if not train:
-        raise HTTPException(status_code=404, detail="Train not found")
+        raise HTTPException(status_code=404, detail="القطار غير موجود")
     train.serial_number = updated.serial_number
     db.commit()
     db.refresh(train)
@@ -48,12 +48,12 @@ def update_train(train_id: int, updated: TrainCreate, db: Session = Depends(get_
 def delete_train(train_id: int, db: Session = Depends(get_db), current_admin: models.Admin = Depends(get_current_admin)):
     train = db.query(models.Train).filter(models.Train.id == train_id).first()
     if not train:
-        raise HTTPException(status_code=404, detail="Train not found")
+        raise HTTPException(status_code=404, detail="القطار غير موجود")
 
     if train.trips:  # <-- the one real difference from stations
         raise HTTPException(
             status_code=409,
-            detail="Cannot delete a train with existing trips. Reassign or remove them first."
+            detail="لا يمكن حذف القطار لوجود رحلات مرتبطة به. أعد تعيينها أو احذفها أولاً."
         )
 
     db.delete(train)

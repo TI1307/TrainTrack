@@ -20,7 +20,7 @@ def get_stations(db:Session = Depends(get_db)):
 def get_station(station_id : int , db : Session = Depends(get_db)):
     station = db.query(models.Station).filter(models.Station.id==station_id).first() # here first will return first match if found or NONe , but without it it will return a query not an object 
     if not station :
-        raise HTTPException(status_code=404,  detail="Station not found")
+        raise HTTPException(status_code=404,  detail="المحطة غير موجودة")
     else :
         return station
 
@@ -46,7 +46,7 @@ def create_station(station :StationCreate, db : Session =Depends(get_db), curren
 def update_station(station_id: int ,updated : StationCreate, db : Session = Depends(get_db), current_admin: models.Admin = Depends(get_current_admin)):
     station=db.query(models.Station).filter(models.Station.id==station_id).first()
     if not station :
-        raise HTTPException( status_code =404 , detail="Station Not found")
+        raise HTTPException( status_code =404 , detail="المحطة غير موجودة")
     else :
         station.name=updated.name
         station.latitude=updated.latitude
@@ -64,7 +64,7 @@ def update_station(station_id: int ,updated : StationCreate, db : Session = Depe
 def delete_station(station_id : int ,db :Session =Depends(get_db) , current_admin: models.Admin = Depends(get_current_admin)):
     station=db.query(models.Station).filter(models.Station.id == station_id).first()
     if not station :
-        raise HTTPException(status_code=404,detail="Station Not Found")
+        raise HTTPException(status_code=404,detail="المحطة غير موجودة")
     else :
         db.delete(station)
         db.commit()
