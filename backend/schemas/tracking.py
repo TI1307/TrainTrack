@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from datetime import time
 
 
 class TrackingRead(BaseModel):
