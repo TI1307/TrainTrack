@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from database import get_db
 import models
-from schemas.tracking import TrackingRead
+from schemas.tracking import TrackingRead , StopStatus
 from utils.pricing import get_common_line_id
 from utils.tracking import find_active_trips, find_current_leg, get_station_distance, interpolate_position
 
@@ -73,3 +73,40 @@ def get_trip_position(trip_id: int, db: Session = Depends(get_db)):
         from_station_id=leg["from_station_id"], to_station_id=leg["to_station_id"],
         progress_percent=round(leg["fraction"] * 100, 1), latitude=lat, longitude=lon,
     )
+
+    # routers/tracking.py — new endpoint
+@router.get("/{trip_id}/path", response_model=list[StopStatus])
+def get_trip_path(trip_id: int, db: Session = Depends(get_db)):
+    trip = db.query(models.Trip).filter(models.Trip.id == trip_id).first()
+    if not trip:
+        raise HTTPException(status_code=404, detail="هذه الرحلة غير موجودة")
+
+    schedulers = db.query(models.Scheduler).filter(models.Scheduler.trip_id == trip_id).all()
+    if not schedulers:
+        raise HTTPException(status_code=404, detail="لا يوجد جدول زمني لهذه الرحلة")
+
+    stops = sorted(schedulers, key=lambda s: s.order)
+    leg = find_current_leg(schedulers, datetime.now().time())
+
+    current_order = None
+    if leg["status"] == "in_progress":
+        current_order = next(s.order for s in stops if s.station_id == leg["to_station_id"])
+    elif leg["status"] == "completed":
+        current_order = stops[-1].order + 1
+
+    result = []
+    for s in stops:
+        if current_order is None:
+            status = "upcoming"
+        elif s.order < current_order:
+            status = "passed"
+        elif s.order == current_order:
+            status = "current"
+        else:
+            status = "upcoming"
+
+        result.append(StopStatus(
+            station_id=s.station_id, station_name=s.station.name, order=s.order,
+            arrival_time=s.arrival_time, departure_time=s.departure_time, stop_status=status,
+        ))
+    return result

@@ -10,3 +10,12 @@ class TrackingRead(BaseModel):
     progress_percent: Optional[float] = None
     latitude: float
     longitude: float
+
+
+class StopStatus(BaseModel):
+    station_id: int
+    station_name: str
+    order: int
+    arrival_time: time
+    departure_time: time
+    stop_status: str  # "passed" | "current" | "upcoming"
