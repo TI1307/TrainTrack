@@ -71,6 +71,14 @@ export default function Login() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
 
+        /* Fix: Ensure body and html cover full viewport */
+        html, body {
+          margin: 0;
+          padding: 0;
+          min-height: 100vh;
+          min-height: 100dvh; /* For dynamic viewport height on mobile */
+        }
+
         @keyframes slideDown {
           from { opacity: 0; transform: translateY(-10px); }
           to { opacity: 1; transform: translateY(0); }
@@ -178,13 +186,19 @@ export default function Login() {
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    minHeight: "100vh",
+    position: "fixed", // Fix: Use fixed positioning to cover entire viewport
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     padding: "1rem",
     fontFamily: "'Tajawal', sans-serif",
     background: "radial-gradient(circle at 30% 20%, #101E3B 0%, #0A1428 55%, #060B18 100%)",
+    backgroundAttachment: "fixed", // Ensure gradient covers everything
+    overflow: "auto", // Allow scrolling if needed
   },
   card: {
     width: "100%",
@@ -194,6 +208,8 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: "16px",
     padding: "2rem",
     boxSizing: "border-box",
+    backdropFilter: "blur(10px)", // Optional: adds glass effect
+    WebkitBackdropFilter: "blur(10px)", // For Safari
   },
   title: {
     fontSize: "1.5rem",
