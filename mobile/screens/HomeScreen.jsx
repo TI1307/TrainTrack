@@ -208,7 +208,7 @@ export default function HomeScreen({ onSearch }) {
           </View>
           {activeField === "to" && (
             <ScrollView style={styles.list} keyboardShouldPersistTaps="handled" >
-              {filteredFromStations.length === 0 ? (
+              {filteredToStations.length === 0 ? (
                <Text style={styles.noResult}>لا توجد محطة بهذا الاسم</Text>
               ) : (
               filteredToStations.map((station) => (
