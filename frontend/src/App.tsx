@@ -1,42 +1,156 @@
-import {BrowserRouter , Routes , Route} from "react-router-dom"
-import Login from '../pages/login'
-import TripType from '../pages/TripTypeSelection'
-import IntraWilaya from '../pages/intraWilaya' 
-import InterWilaya from '../pages/interWilaya'
-import './App.css'
+// frontend/src/App.tsx
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { Layout } from './components/common/Layout';
 
-function App() {
+import Login from '../pages/login';
+import Dashboard from '../pages/Dashboard';
+import Stations from '../pages/Stations';
+import Trains from '../pages/Trains';
+import Wilayas from '../pages/Wilayas';
+import AdminUsers from '../pages/AdminUsers';
+import Lines from '../pages/Lines';
+import Trips from '../pages/Trips';
+import SchedulerPage from '../pages/Scheduler';
+import Notices from '../pages/Notices';
+import TicketConfig from '../pages/TicketConfig';
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          background: '#0A1428',
+          color: '#94A3B8',
+          fontFamily: 'Tajawal, sans-serif',
+          direction: 'rtl',
+        }}
+      >
+        <span className="spinner" style={{ width: '32px', height: '32px', marginLeft: '0.75rem' }}></span>
+        <span>جاري التحقق من تسجيل الدخول...</span>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Layout>{children}</Layout>;
+};
+
+function AppRoutes() {
   return (
-    <BrowserRouter>
-      <Routes>
-        //login
-        <Route 
+    <Routes>
+      <Route path="/login" element={<Login />} />
+
+      <Route
         path="/"
-        element ={<Login/>}
-        />
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
 
-        //TripTypeSelection
-        <Route 
-        path="/trip-type"
-        element ={<TripType />}
-        />
+      <Route
+        path="/stations"
+        element={
+          <ProtectedRoute>
+            <Stations />
+          </ProtectedRoute>
+        }
+      />
 
-        //interWilaya 
-        <Route 
-        path="/interWilaya"
-        element ={<InterWilaya />}
-        />
+      <Route
+        path="/trains"
+        element={
+          <ProtectedRoute>
+            <Trains />
+          </ProtectedRoute>
+        }
+      />
 
-        //intraWilaya
-        <Route 
-        path="/intraWilaya"
-        element ={<IntraWilaya />}
-        />
-        
+      <Route
+        path="/wilayas"
+        element={
+          <ProtectedRoute>
+            <Wilayas />
+          </ProtectedRoute>
+        }
+      />
 
-      </Routes>
-    </BrowserRouter>
-  )
+      <Route
+        path="/admin-users"
+        element={
+          <ProtectedRoute>
+            <AdminUsers />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/lines"
+        element={
+          <ProtectedRoute>
+            <Lines />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/trips"
+        element={
+          <ProtectedRoute>
+            <Trips />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/scheduler"
+        element={
+          <ProtectedRoute>
+            <SchedulerPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/notices"
+        element={
+          <ProtectedRoute>
+            <Notices />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/ticket-config"
+        element={
+          <ProtectedRoute>
+            <TicketConfig />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 }
 
-export default App
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
