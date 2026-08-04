@@ -23,7 +23,7 @@ def get_wilaya (wilaya_id:int , db:Session =Depends(get_db)) :
 #post / wilayas
 @router.post ( "/" , response_model = wilayaRead)
 def post_wilaya (wilaya:wilayaCreate , db:Session =Depends(get_db) , current_admin :models.Admin=Depends(get_current_admin)):
-    existing=db.query(models.Wilaya).filter(models.Wilaya.name==wilaya.name)
+    existing=db.query(models.Wilaya).filter(models.Wilaya.name==wilaya.name).first()
     if existing:
         raise HTTPException (status_code=409 , detail ="توجد هذه الولاية مسبقا ")
     new_wilaya= models.Wilaya (**wilaya.model_dump())

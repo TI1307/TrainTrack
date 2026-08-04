@@ -61,3 +61,6 @@ def get_route_notices(from_station_id: int = Query(...), to_station_id: int = Qu
             models.Notice.station_id.in_(station_ids),
         )
     ).all()
+
+
+

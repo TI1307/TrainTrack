@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useState } from "react";
+import React, { useRef, useMemo, useState ,useEffect } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import MapView from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,6 +6,7 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { FlatList } from "react-native";
 import TrainCard from "../components/TrainCard";
 import { mockTrains } from "../data/mockTrains";
+import  {get_notices} from "../api/passenger";
 
 
 
@@ -13,18 +14,26 @@ const NAVY = "#0B3D6B";
 const GREEN = "#2E9E5B";
 
 type SearchResultParam = {
-  from: string;
-  to: string;
+  from:string;
+  to :string;
+  fromStationId: number;
+  toStationId: number;
   date: Date;
   onBack: () => void;
 }
 
-export default function SearchResultsScreen({ from, to, date, onBack }: SearchResultParam) {
+export default function SearchResultsScreen({ from , to ,fromStationId, toStationId, date, onBack }: SearchResultParam) {
   const sheetRef = useRef(null);
   const snapPoints = useMemo(() => ["25%", "40%", "70%", "90%"], []);
   const [selectedTrainId, setSelectedTrainId] = useState<string | null>(null);
-
+  const [notices, setNotices] = useState<any[]>([]);
   const selectedTrain = mockTrains.find((t) => t.id === selectedTrainId) ?? null;
+  useEffect (()=>{
+    get_notices(fromStationId , toStationId ).then( data =>{
+       setNotices(data);
+    });
+},[ fromStationId ,toStationId]);
+
   return (
     <View style={styles.container}>
       <MapView
@@ -51,9 +60,14 @@ export default function SearchResultsScreen({ from, to, date, onBack }: SearchRe
           <Ionicons name="warning" size={18} color="#E8622C" />
           <Text style={styles.noticeTitle}>ملاحظة:</Text>
         </View>
-        <Text style={styles.noticeText}>
-          يوجد تأخر متوقع بـ 8 دقائق بسبب أعمال الصيانة بالقرب من زرالدة
-        </Text>
+        {notices.map((notice)=>(
+          <Text key={notice.id} style={styles.noticeText}>
+           {notice.message}
+          </Text>
+
+        )
+
+        )}
       </View>
 
       <BottomSheet ref={sheetRef} index={1} snapPoints={snapPoints}>

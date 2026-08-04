@@ -1,16 +1,11 @@
-import React, { useState, useMemo } from "react";
-import { Image, View, Text, TextInput, StyleSheet, Pressable, Keyboard, Modal, FlatList,} from "react-native";
+import React, { useState, useMemo , useEffect } from "react";
+import { Image, View, Text, TextInput, StyleSheet, Pressable, Keyboard, Modal, FlatList,ScrollView} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import {getStations} from "../api/station"
 
 const NAVY = "#0B3D6B";
 const DAYS_COUNT = 10; // number upcoming days to show in the strip
 
-const stations = [
-  "زرالدة",
-  "سيدي عبد الله الجامعة",
-  "سيدي عبد الله",
-  "تسالة المرجة",
-];
 
 const WEEKDAYS = [
   "الأحد",
@@ -45,34 +40,50 @@ function formatDate(d) {
   return `${dd}/${mm}/${yyyy}`;
 }
 
+
 export default function HomeScreen({ onSearch }) {
   const [fromSearch, setFromSearch] = useState("");
   const [toSearch, setToSearch] = useState("");
+  const [fromStationId, setFromStationId] = useState("");
+  const [toStationId, setToStationId] = useState("");
   const [activeField, setActiveField] = useState(null);
+
 
   const days = useMemo(() => generateDays(DAYS_COUNT), []);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0); // 0 = today
   const [dateModalVisible, setDateModalVisible] = useState(false);
-
+    //get function
+  const [stations , setStations]=useState([])
+  useEffect(() => {
+  getStations().then(data => {
+    console.log(data)
+    setStations(data);
+  });
+}, []);
   const filteredFromStations = stations.filter((station) =>
-    station.toLowerCase().includes(fromSearch.toLowerCase())
+    station.name.toLowerCase().includes(fromSearch.toLowerCase())
   );
   const filteredToStations = stations.filter((station) =>
-    station.toLowerCase().includes(toSearch.toLowerCase())
+    station.name.toLowerCase().includes(toSearch.toLowerCase())
   );
 
+
+  
   const selectFrom = (station) => {
-    setFromSearch(station);
+    setFromSearch(station.name);
+    setFromStationId(station.id);
     setActiveField(null);
     Keyboard.dismiss();
   };
 
   const selectTo = (station) => {
-    setToSearch(station);
+    setToSearch(station.name);
+    setToStationId(station.id);
     setActiveField(null);
     Keyboard.dismiss();
   };
-
+  
+  
   return (
     <Pressable style={styles.container} onPress={() => setActiveField(null)}>
 <Image source={require("../assets/rail-top-left.png")} style={styles.railTopLeft} />
@@ -115,17 +126,20 @@ export default function HomeScreen({ onSearch }) {
             />
           </View>
           {activeField === "from" && (
-            <View style={styles.list}>
+           <ScrollView
+            style={styles.list}
+            keyboardShouldPersistTaps="handled" >
               {filteredFromStations.map((station) => (
                 <Pressable
-                  key={station}
+                  key={station.id}
                   style={styles.item}
                   onPress={() => selectFrom(station)}
                 >
-                  <Text>{station}</Text>
+                  <Text>{station.name}</Text>
                 </Pressable>
-              ))}
-            </View>
+              ))
+              }
+            </ScrollView>
           )}
         </View>
 
@@ -158,17 +172,19 @@ export default function HomeScreen({ onSearch }) {
             />
           </View>
           {activeField === "to" && (
-            <View style={styles.list}>
+            <ScrollView
+    style={styles.list}
+    keyboardShouldPersistTaps="handled" >
               {filteredToStations.map((station) => (
                 <Pressable
-                  key={station}
+                  key={station.id}
                   style={styles.item}
                   onPress={() => selectTo(station)}
                 >
-                  <Text>{station}</Text>
+                  <Text>{station.name}</Text>
                 </Pressable>
               ))}
-            </View>
+            </ScrollView>
           )}
         </View>
 
@@ -249,6 +265,8 @@ export default function HomeScreen({ onSearch }) {
 
         <Pressable style={styles.button} 
         onPress={ () => onSearch({
+          fromStationId,
+          toStationId,
           from:fromSearch,
           to:toSearch,
           date:days[selectedDayIndex].date,
@@ -326,6 +344,7 @@ const styles = StyleSheet.create({
   },
   list: {
     width: "100%",
+    maxHeight: 150, 
     borderWidth: 1,
     borderColor: "#eee",
     borderRadius: 8,
