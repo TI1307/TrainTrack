@@ -1,7 +1,12 @@
 // frontend/pages/Scheduler.tsx
 import { useEffect, useState } from 'react';
 import type { Scheduler, Line, Trip, Station, Train } from '../src/types';
-import { mockService } from '../src/services/mockService';
+import {getSchedulers ,createScheduler , updateScheduler , deleteScheduler} from '../api/scheduler';
+import {getLines} from '../api/line';
+import {getStations} from '../api/station';
+import {getTrains} from '../api/train';
+import {getTrips} from '../api/trip';
+
 import { DataTable, type Column } from '../src/components/common/DataTable';
 import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
@@ -38,9 +43,9 @@ export default function SchedulerPage() {
   const fetchInitialData = async () => {
     try {
       const [lnList, stList, trList] = await Promise.all([
-        mockService.getLines(),
-        mockService.getStations(),
-        mockService.getTrains(),
+        getLines(),
+        getStations(),
+        getTrains(),
       ]);
       setLines(lnList);
       setStations(stList);
@@ -62,7 +67,7 @@ export default function SchedulerPage() {
   useEffect(() => {
     async function updateTrips() {
       if (selectedLineId !== null) {
-        const trps = await mockService.getTrips(selectedLineId);
+        const trps = await getTrips(selectedLineId);
         setTripsForLine(trps);
         if (trps.length > 0) {
           setSelectedTripId(trps[0].id);
@@ -80,7 +85,7 @@ export default function SchedulerPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await mockService.getSchedulers(tripId);
+      const data = await getSchedulers(tripId);
       setSchedulers(data);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'خطأ في تحميل مواعيد الرحلة');
@@ -130,13 +135,13 @@ export default function SchedulerPage() {
 
     try {
       if (editingScheduler) {
-        await mockService.updateScheduler(editingScheduler.id, {
+        await updateScheduler(editingScheduler.id, {
           order: Number(form.order),
           arrival_time: formatTime(form.arrival_time),
           departure_time: formatTime(form.departure_time),
         });
       } else {
-        await mockService.createScheduler({
+        await createScheduler({
           trip_id: selectedTripId,
           station_id: Number(form.station_id),
           order: Number(form.order),
@@ -158,7 +163,7 @@ export default function SchedulerPage() {
     setIsDeleting(true);
     setError(null);
     try {
-      await mockService.deleteScheduler(deletingId);
+      await deleteScheduler(deletingId);
       setDeletingId(null);
       await fetchSchedulers(selectedTripId);
     } catch (err: unknown) {

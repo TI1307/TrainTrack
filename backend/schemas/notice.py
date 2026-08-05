@@ -18,7 +18,6 @@ class noticeCreate  (BaseModel):
     station_id: int  | None = None
     trip_id: int | None = None
     message: str
-    created_at: datetime
         
     
 

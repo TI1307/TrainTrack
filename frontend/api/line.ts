@@ -17,7 +17,7 @@ export function updateLine(Line_id:number ,data:{name: string , length: number})
 }
 //delete a Line 
 export function deleteLine(Line_id:number){
-     return client.delete(`lines/${Line_id}`).then (resp=>resp.data)
+     return client.delete(`/lines/${Line_id}`).then (resp=>resp.data)
 }
 
 

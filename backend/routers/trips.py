@@ -9,7 +9,7 @@ from routers.auth import get_current_admin
 router = APIRouter (prefix="/trips"  ,tags=["trips"])
 
 #GET /ALL trips FOR A LINE 
-@router.get ( "/" , response_model = list[tripRead])
+@router.get ( "/{line_id}" , response_model = list[tripRead])
 def get_trips (line_id:int ,db:Session =Depends(get_db) ):
     line=db.query(models.Line).filter(models.Line.id== line_id).first()
     if not line:

@@ -9,7 +9,7 @@ from routers.auth import get_current_admin
 router = APIRouter (prefix="/scheduler"  ,tags=["scheduler"])
 
 #GET /ALL schedular for a trip 
-@router.get ( "/" , response_model = list[schedulerRead ])
+@router.get ( "/{trip_id}" , response_model = list[schedulerRead ])
 def get_schedulers_by_trip (trip_id:int ,db:Session =Depends(get_db) ):
    trip=db.query(models.Trip).filter(models.Trip.id==trip_id).first()
    if not trip:

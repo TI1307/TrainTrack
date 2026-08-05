@@ -1,7 +1,9 @@
 // frontend/pages/Trips.tsx
 import { useEffect, useState } from 'react';
 import type { Trip, Line, Train, TripStatus, TripType } from '../src/types';
-import { mockService } from '../src/services/mockService';
+import {getTrips ,createTrip , updateTrip , deleteTrip} from '../api/trip';
+import {getLines} from '../api/line';
+import {getTrains} from '../api/train';
 import { DataTable, type Column } from '../src/components/common/DataTable';
 import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
@@ -39,7 +41,7 @@ export default function Trips() {
 
   const fetchInitialData = async () => {
     try {
-      const [lnList, trList] = await Promise.all([mockService.getLines(), mockService.getTrains()]);
+      const [lnList, trList] = await Promise.all([getLines(), getTrains()]);
       setLines(lnList);
       setTrains(trList);
       if (lnList.length > 0 && selectedLineId === null) {
@@ -54,7 +56,7 @@ export default function Trips() {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await mockService.getTrips(lineId);
+      const data = await getTrips(lineId);
       setTrips(data);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'خطأ في تحميل الرحلات للخط المحدد');
@@ -103,12 +105,12 @@ export default function Trips() {
     setError(null);
     try {
       if (editingTrip) {
-        await mockService.updateTrip(editingTrip.id, {
+        await updateTrip(editingTrip.id, {
           status: form.status,
           tripType: form.tripType,
         });
       } else {
-        await mockService.createTrip({
+        await createTrip({
           line_id: Number(form.line_id),
           train_id: Number(form.train_id),
           status: form.status,
@@ -129,7 +131,7 @@ export default function Trips() {
     setIsDeleting(true);
     setError(null);
     try {
-      await mockService.deleteTrip(deletingId);
+      await deleteTrip(deletingId);
       setDeletingId(null);
       await fetchTripsForLine(selectedLineId);
     } catch (err: unknown) {

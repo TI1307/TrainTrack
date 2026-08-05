@@ -1,7 +1,10 @@
 // frontend/pages/Notices.tsx
 import { useEffect, useState } from 'react';
 import type { Notice, Line, Station, Trip } from '../src/types';
-import { mockService } from '../src/services/mockService';
+import {getNotices ,createNotice , updateNotice , deleteNotice} from '../api/notice';
+import {getLines} from '../api/line';
+import {getStations} from '../api/station';
+import {getTrips} from '../api/trip';
 import { DataTable, type Column } from '../src/components/common/DataTable';
 import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
@@ -39,9 +42,9 @@ export default function Notices() {
   const fetchDependencies = async () => {
     try {
       const [lnList, stList, trList] = await Promise.all([
-        mockService.getLines(),
-        mockService.getStations(),
-        mockService.getTrips(1),
+        getLines(),
+        getStations(),
+        getTrips(1),
       ]);
       setLines(lnList);
       setStations(stList);
@@ -59,12 +62,12 @@ export default function Notices() {
     setIsLoading(true);
     setError(null);
     try {
-      const filter: { line_id?: number | null; station_id?: number | null; trip_id?: number | null } = {};
+      const filter: { line_id?: number ; station_id?: number ; trip_id?: number  } = {};
       if (filterLineId !== 'all') filter.line_id = filterLineId;
       if (filterStationId !== 'all') filter.station_id = filterStationId;
       if (filterTripId !== 'all') filter.trip_id = filterTripId;
 
-      const data = await mockService.getNotices(Object.keys(filter).length > 0 ? filter : undefined);
+      const data = await getNotices(Object.keys(filter).length > 0 ? filter : undefined);
       setNotices(data);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'خطأ في تحميل الإشعارات والتنبيهات');
@@ -104,16 +107,16 @@ export default function Notices() {
     setError(null);
     try {
       if (editingNotice) {
-        await mockService.updateNotice(editingNotice.id, { message });
+        await updateNotice(editingNotice.id, { message });
       } else {
-        const payload: { line_id?: number | null; station_id?: number | null; trip_id?: number | null; message: string } = {
+        const payload: { line_id?: number ; station_id?: number ; trip_id?: number ; message: string  } = {
           message,
         };
         if (attachType === 'line') payload.line_id = formLineId;
         if (attachType === 'station') payload.station_id = formStationId;
         if (attachType === 'trip') payload.trip_id = formTripId;
 
-        await mockService.createNotice(payload);
+        await createNotice(payload);
       }
       setIsModalOpen(false);
       await fetchNotices();
@@ -129,7 +132,7 @@ export default function Notices() {
     setIsDeleting(true);
     setError(null);
     try {
-      await mockService.deleteNotice(deletingId);
+      await deleteNotice(deletingId);
       setDeletingId(null);
       await fetchNotices();
     } catch (err: unknown) {

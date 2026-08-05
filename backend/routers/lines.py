@@ -49,7 +49,7 @@ def delete_line(line_id :int,db:Session=Depends(get_db) , current_user:models.Ad
     line=db.query(models.Line).filter(models.Line.id==line_id).first()
     if not line:
             raise HTTPException (status_code=404 , detail="لا يوجد هذا الخط")
-    #we can't delete a line that have trip but we can delete line that have notices and line geomtery encascade
+    #we can't delete a line that have trip or station related to it  but we can delete line that have notices and line geomtery encascade
     if line.trips :
             raise HTTPException (status_code=409 , detail="لا يمكن حذف هذا الخط لوجود رحلات مرتبطة به")
     
