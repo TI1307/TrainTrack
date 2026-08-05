@@ -1,7 +1,7 @@
 // frontend/pages/Wilayas.tsx
 import { useEffect, useState } from 'react';
 import type { Wilaya } from '../src/types';
-import { mockService } from '../src/services/mockService';
+import {getWilayas ,createWilaya , updateWilaya , deleteWilaya} from '../api/wilaya';
 import { DataTable, type Column } from '../src/components/common/DataTable';
 import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
@@ -17,7 +17,7 @@ export default function Wilayas() {
   const [editingWilaya, setEditingWilaya] = useState<Wilaya | null>(null);
   const [name, setName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   // Delete state
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -25,7 +25,7 @@ export default function Wilayas() {
   const fetchWilayas = async () => {
     setIsLoading(true);
     try {
-      const data = await mockService.getWilayas();
+      const data = await getWilayas();
       setWilayas(data);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'خطأ في تحميل بيانات الولايات');
@@ -60,9 +60,11 @@ export default function Wilayas() {
     setError(null);
     try {
       if (editingWilaya) {
-        await mockService.updateWilaya(editingWilaya.id, { name });
+        await updateWilaya(editingWilaya.id, { name });
+        setSuccessMessage("لقد تم  تغير اسم الولاية بنجاح");
       } else {
-        await mockService.createWilaya({ name });
+        await createWilaya({ name });
+        setSuccessMessage("لقد تم اضافة الولاية بنجاح");
       }
       setIsModalOpen(false);
       await fetchWilayas();
@@ -78,8 +80,9 @@ export default function Wilayas() {
     setIsDeleting(true);
     setError(null);
     try {
-      await mockService.deleteWilaya(deletingId);
+      await deleteWilaya(deletingId);
       setDeletingId(null);
+      setSuccessMessage("لقد تم حذف الولاية بنجاح");
       await fetchWilayas();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'فشل حذف الولاية');
@@ -132,6 +135,27 @@ export default function Wilayas() {
       </div>
 
       <ErrorMessage error={error} onClear={() => setError(null)} />
+              {successMessage && (
+        <div
+          style={{
+            padding: '0.75rem 1rem',
+            borderRadius: '8px',
+            background: 'rgba(16, 185, 129, 0.15)',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            color: '#34D399',
+            marginBottom: '1.25rem',
+            fontSize: '0.875rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
+          <span>{successMessage}</span>
+          <button onClick={() => setSuccessMessage(null)} style={{ background: 'none', border: 'none', color: '#34D399', cursor: 'pointer' }}>
+            ✕
+          </button>
+        </div>
+      )}
+
 
       <DataTable
         columns={columns}

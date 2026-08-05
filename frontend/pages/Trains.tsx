@@ -1,7 +1,7 @@
 // frontend/pages/Trains.tsx
 import { useEffect, useState } from 'react';
 import type { Train } from '../src/types';
-import { mockService } from '../src/services/mockService';
+import {getTrains ,createTrain , updateTrain , deleteTrain} from '../api/train';
 import { DataTable, type Column } from '../src/components/common/DataTable';
 import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
@@ -18,6 +18,8 @@ export default function Trains() {
   const [serialNumber, setSerialNumber] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
+  
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   // Delete state
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -25,7 +27,7 @@ export default function Trains() {
   const fetchTrains = async () => {
     setIsLoading(true);
     try {
-      const data = await mockService.getTrains();
+      const data = await getTrains();
       setTrains(data);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'خطأ في تحميل بيانات القطارات');
@@ -60,9 +62,11 @@ export default function Trains() {
     setError(null);
     try {
       if (editingTrain) {
-        await mockService.updateTrain(editingTrain.id, { serial_number: serialNumber });
+        await updateTrain(editingTrain.id, { serial_number: serialNumber });
+        setSuccessMessage("لقد تم تغيير معلومات القطار بنجاح");
       } else {
-        await mockService.createTrain({ serial_number: serialNumber });
+        await createTrain({ serial_number: serialNumber });
+        setSuccessMessage("لقد تم اضافة القطار بنجاح");
       }
       setIsModalOpen(false);
       await fetchTrains();
@@ -78,8 +82,9 @@ export default function Trains() {
     setIsDeleting(true);
     setError(null);
     try {
-      await mockService.deleteTrain(deletingId);
+      await deleteTrain(deletingId);
       setDeletingId(null);
+      setSuccessMessage("لقد تم حذف القطار بنجاح");
       await fetchTrains();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'فشل حذف القطار');
@@ -132,6 +137,26 @@ export default function Trains() {
       </div>
 
       <ErrorMessage error={error} onClear={() => setError(null)} />
+          {successMessage && (
+        <div
+          style={{
+            padding: '0.75rem 1rem',
+            borderRadius: '8px',
+            background: 'rgba(16, 185, 129, 0.15)',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            color: '#34D399',
+            marginBottom: '1.25rem',
+            fontSize: '0.875rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
+          <span>{successMessage}</span>
+          <button onClick={() => setSuccessMessage(null)} style={{ background: 'none', border: 'none', color: '#34D399', cursor: 'pointer' }}>
+            ✕
+          </button>
+        </div>
+      )}
 
       <DataTable
         columns={columns}

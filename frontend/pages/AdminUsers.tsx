@@ -57,7 +57,7 @@ export default function AdminUsers() {
       await fetchAdmins();
     } catch (err: unknown) {
     if (axios.isAxiosError(err) && err.response?.data?.detail) {
-      setError(err.response.data.detail);   // real backend message, e.g. "يوجد مسؤول بنفس..."
+      setError(err.response.data.detail);   // real backend message, "يوجد مسؤول بنفس..."
     } else {
       setError('فشل إرسال الدعوة');
     }

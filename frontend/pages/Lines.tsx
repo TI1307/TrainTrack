@@ -1,7 +1,11 @@
 // frontend/pages/Lines.tsx
 import { useEffect, useState } from 'react';
 import type { Line, LineStation, LineGeometry, Station } from '../src/types';
-import { mockService } from '../src/services/mockService';
+import {getStations } from '../api/station';
+import {getLineGeometry ,createLineGeometry ,updateLineGeometry,deleteLineGeometry}from '../api/line_geometry';
+import {getLineStations ,createLineStation ,updateLineStation,deleteLineStation}from '../api/line_station';
+import {getLines ,createLine ,updateLine,deleteLine}from '../api/line';
+
 import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
 import { ErrorMessage } from '../src/components/common/ErrorMessage';
@@ -43,7 +47,7 @@ export default function Lines() {
 
   const fetchBaseData = async () => {
     try {
-      const [lnList, stList] = await Promise.all([mockService.getLines(), mockService.getStations()]);
+      const [lnList, stList] = await Promise.all([getLines(),getStations()]);
       setLines(lnList);
       setStations(stList);
       if (lnList.length > 0 && selectedLineId === null) {
@@ -57,8 +61,8 @@ export default function Lines() {
   const fetchLineSubDetails = async (lineId: number) => {
     try {
       const [ls, lg] = await Promise.all([
-        mockService.getLineStations(lineId),
-        mockService.getLineGeometry(lineId),
+        getLineStations(lineId),
+        getLineGeometry(lineId),
       ]);
       setLineStations(ls);
       setLineGeometry(lg);
@@ -95,9 +99,9 @@ export default function Lines() {
     if (!lineForm.name.trim()) return setError('اسم الخط مطلوب');
     try {
       if (editingLine) {
-        await mockService.updateLine(editingLine.id, { name: lineForm.name, length: Number(lineForm.length) });
+        await updateLine(editingLine.id, { name: lineForm.name, length: Number(lineForm.length) });
       } else {
-        const created = await mockService.createLine({ name: lineForm.name, length: Number(lineForm.length) });
+        const created = await createLine({ name: lineForm.name, length: Number(lineForm.length) });
         setSelectedLineId(created.id);
       }
       setIsLineModalOpen(false);
@@ -132,13 +136,12 @@ export default function Lines() {
     if (!currentSelectedLine) return;
     try {
       if (editingStationLink) {
-        await mockService.updateLineStation(currentSelectedLine.id, editingStationLink.station_id, {
-          order: Number(stationLinkForm.order),
-          distance: Number(stationLinkForm.distance),
+        await updateLineStation(currentSelectedLine.id, editingStationLink.station_id, {order: Number(stationLinkForm.order),
+            distance: Number(stationLinkForm.distance)
         });
       } else {
-        await mockService.createLineStation({
-          line_name: currentSelectedLine.name,
+        await createLineStation({
+          line_name:currentSelectedLine.name,
           station_name: stationLinkForm.station_name,
           order: Number(stationLinkForm.order),
           distance: Number(stationLinkForm.distance),
@@ -176,14 +179,14 @@ export default function Lines() {
     if (!currentSelectedLine) return;
     try {
       if (editingGeometryPt) {
-        await mockService.updateLineGeometry(editingGeometryPt.id, {
+        await updateLineGeometry(editingGeometryPt.id, {
           sequence: Number(geometryForm.sequence),
           latitude: Number(geometryForm.latitude),
           longitude: Number(geometryForm.longitude),
         });
       } else {
-        await mockService.createLineGeometry({
-          line_name: currentSelectedLine.name,
+        await createLineGeometry({
+          line_name:currentSelectedLine.name,
           sequence: Number(geometryForm.sequence),
           latitude: Number(geometryForm.latitude),
           longitude: Number(geometryForm.longitude),
@@ -202,14 +205,14 @@ export default function Lines() {
     setIsDeleting(true);
     try {
       if (deletingType === 'line') {
-        await mockService.deleteLine(currentSelectedLine.id);
+        await deleteLine(currentSelectedLine.id);
         setSelectedLineId(null);
         await fetchBaseData();
       } else if (deletingType === 'station' && deletingTarget?.station_id) {
-        await mockService.deleteLineStation(currentSelectedLine.id, deletingTarget.station_id);
+        await deleteLineStation(currentSelectedLine.id, deletingTarget.station_id);
         await fetchLineSubDetails(currentSelectedLine.id);
       } else if (deletingType === 'geometry' && deletingTarget?.id) {
-        await mockService.deleteLineGeometry(deletingTarget.id);
+        await deleteLineGeometry(deletingTarget.id);
         await fetchLineSubDetails(currentSelectedLine.id);
       }
       setDeletingType(null);

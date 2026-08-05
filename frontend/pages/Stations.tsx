@@ -1,7 +1,8 @@
 // frontend/pages/Stations.tsx
 import { useEffect, useState } from 'react';
 import type { Station, Wilaya } from '../src/types';
-import { mockService } from '../src/services/mockService';
+import {getWilayas } from '../api/wilaya';
+import {getStations ,createStation , updateStation , deleteStation} from '../api/station';
 import { DataTable, type Column } from '../src/components/common/DataTable';
 import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
@@ -27,7 +28,7 @@ export default function Stations() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [stList, wlList] = await Promise.all([mockService.getStations(), mockService.getWilayas()]);
+      const [stList, wlList] = await Promise.all([getStations(), getWilayas()]);
       setStations(stList);
       setWilayas(wlList);
       if (wlList.length > 0 && !editingStation) {
@@ -71,14 +72,14 @@ export default function Stations() {
     setError(null);
     try {
       if (editingStation) {
-        await mockService.updateStation(editingStation.id, {
+        await updateStation(editingStation.id, {
           name: formData.name,
           latitude: Number(formData.latitude),
           longitude: Number(formData.longitude),
           wilaya_id: Number(formData.wilaya_id),
         });
       } else {
-        await mockService.createStation({
+        await createStation({
           name: formData.name,
           latitude: Number(formData.latitude),
           longitude: Number(formData.longitude),
@@ -99,7 +100,7 @@ export default function Stations() {
     setIsDeleting(true);
     setError(null);
     try {
-      await mockService.deleteStation(deletingId);
+      await deleteStation(deletingId);
       setDeletingId(null);
       await fetchData();
     } catch (err: unknown) {

@@ -6,7 +6,7 @@ const client = axios.create({
 
 // Add the access token to the config's Authorization header before each request.
 client.interceptors.request.use((config)=>{
-  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdXBlcmFkbWluIiwiZXhwIjoxNzg1ODkxOTY4fQ.hTYnroj95qCmpZldE6VLq4rmnla-7ELjIFFE2qdvS2Y';
+  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdXBlcmFkbWluIiwiZXhwIjoxNzg1OTU0NDk4fQ.y3yPoPHecYGrxslAsFGkW7Pvx60qakMmHp3WrglVeHc';
   if(token){
     config.headers.Authorization= `Bearer ${token}`;  
   }
