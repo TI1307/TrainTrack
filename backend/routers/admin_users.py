@@ -27,6 +27,12 @@ def get_user (admin_id:int , db:Session =Depends(get_db) , current_admin : model
 @router.post ("/" , response_model=adminRead)
 async def create_admin (admin :adminCreate , db: Session=Depends(get_db) ,current_admin : models.Admin=Depends(require_super_admin )):
     raw_token=generate_token()
+    existing = db.query(models.Admin).filter(
+    (models.Admin.email == admin.email) | (models.Admin.username == admin.username),
+    models.Admin.status != models.AccountStatus.disabled
+    ).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="يوجد مسؤول بنفس البريد الإلكتروني أو اسم المستخدم")
     admin= models.Admin (
         username=admin.username,
         password_hash=None,

@@ -12,6 +12,7 @@ import type {
   Notice,
   TicketClass,
   PriceResponse,
+  AccountStatus,
 } from '../types';
 import {
   initialStations,
@@ -66,7 +67,7 @@ export const mockService = {
     if (!username || !password) {
       throw new Error('اسم المستخدم وكلمة المرور مطلوبان');
     }
-    if (username === 'admin' && password === 'admin123') {
+    if (username === 'superadmin' && password === 'ChangeMe123!') {
       return { access_token: 'mock-admin-token-123456', token_type: 'bearer' };
     }
     if (password.length >= 6) {
@@ -196,7 +197,7 @@ export const mockService = {
     if (!u) throw new Error('المسؤول غير موجود');
     return u;
   },
-  async createAdminUser(data: { username: string; email: string }): Promise<AdminUser> {
+  async createAdminUser(data: { username: string; email: string ,status:AccountStatus}): Promise<AdminUser> {
     await delay();
     const newAdmin: AdminUser = { id: Date.now(), ...data };
     adminUsers.push(newAdmin);

@@ -1,11 +1,12 @@
 // frontend/pages/AdminUsers.tsx
 import { useEffect, useState } from 'react';
 import type { AdminUser } from '../src/types';
-import { mockService } from '../src/services/mockService';
+import {getAdminUsers , createAdminUser ,deleteAdminUser} from'../api/adminUsers';
 import { DataTable, type Column } from '../src/components/common/DataTable';
 import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
 import { ErrorMessage } from '../src/components/common/ErrorMessage';
+import axios from 'axios';
 
 export default function AdminUsers() {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
@@ -17,10 +18,7 @@ export default function AdminUsers() {
   const [inviteForm, setInviteForm] = useState({ username: '', email: '' });
   const [isInviting, setIsInviting] = useState(false);
 
-  // Set Password Modal state
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({ email: '', token: 'INVITE-TOKEN-999', new_password: '' });
-  const [isSettingPassword, setIsSettingPassword] = useState(false);
+  
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Delete state
@@ -30,7 +28,7 @@ export default function AdminUsers() {
   const fetchAdmins = async () => {
     setIsLoading(true);
     try {
-      const data = await mockService.getAdminUsers();
+      const data = await getAdminUsers();
       setAdmins(data);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'خطأ في تحميل حسابات الأدمن');
@@ -52,48 +50,30 @@ export default function AdminUsers() {
     setIsInviting(true);
     setError(null);
     try {
-      await mockService.createAdminUser(inviteForm);
+      await createAdminUser(inviteForm);
       setIsInviteModalOpen(false);
       setInviteForm({ username: '', email: '' });
       setSuccessMessage('تم دعوة المشرف وإضافته بنجاح');
       await fetchAdmins();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل إرسال الدعوة');
-    } finally {
-      setIsInviting(false);
+    if (axios.isAxiosError(err) && err.response?.data?.detail) {
+      setError(err.response.data.detail);   // real backend message, e.g. "يوجد مسؤول بنفس..."
+    } else {
+      setError('فشل إرسال الدعوة');
     }
+  } finally {
+    setIsInviting(false);
+  }
   };
 
-  const handleOpenSetPasswordModal = (email: string) => {
-    setPasswordForm({ email, token: 'INVITE-TOKEN-999', new_password: '' });
-    setIsPasswordModalOpen(true);
-  };
 
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!passwordForm.email || !passwordForm.new_password || !passwordForm.token) {
-      setError('جميع حقول تعيين كلمة المرور مطلوبة');
-      return;
-    }
-    setIsSettingPassword(true);
-    setError(null);
-    try {
-      const msg = await mockService.setAdminPassword(passwordForm);
-      setIsPasswordModalOpen(false);
-      setSuccessMessage(msg);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل تعيين كلمة المرور');
-    } finally {
-      setIsSettingPassword(false);
-    }
-  };
 
   const handleDelete = async () => {
     if (!deletingId) return;
     setIsDeleting(true);
     setError(null);
     try {
-      await mockService.deleteAdminUser(deletingId);
+      await deleteAdminUser(deletingId);
       setDeletingId(null);
       setSuccessMessage('تم حذف حساب الأدمن بنجاح');
       await fetchAdmins();
@@ -108,6 +88,7 @@ export default function AdminUsers() {
     { key: 'id', header: 'المعرف ID' },
     { key: 'username', header: 'اسم المستخدم (Username)' },
     { key: 'email', header: 'البريد الإلكتروني (Email)' },
+    { key: 'status', header: 'حالة المستخدم (Status)' },
   ];
 
   return (
@@ -181,20 +162,7 @@ export default function AdminUsers() {
         searchPlaceholder="بحث عن أدمن بالاسم أو البريد..."
         actions={(admin) => (
           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-            <button
-              onClick={() => handleOpenSetPasswordModal(admin.email)}
-              style={{
-                padding: '0.35rem 0.75rem',
-                borderRadius: '6px',
-                background: 'rgba(139, 92, 246, 0.15)',
-                border: '1px solid rgba(139, 92, 246, 0.3)',
-                color: '#C084FC',
-                cursor: 'pointer',
-                fontSize: '0.8rem',
-              }}
-            >
-              🔑 تعيين كلمة المرور
-            </button>
+            
             <button
               onClick={() => setDeletingId(admin.id)}
               style={{
@@ -302,114 +270,7 @@ export default function AdminUsers() {
         </form>
       </Modal>
 
-      {/* Set Password Modal */}
-      <Modal isOpen={isPasswordModalOpen} onClose={() => setIsPasswordModalOpen(false)} title="تعيين كلمة المرور للمسؤول">
-        <form onSubmit={handlePasswordSubmit}>
-          <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{ display: 'block', fontSize: '0.875rem', color: '#CBD5E1', marginBottom: '0.375rem' }}>
-              البريد الإلكتروني (email)
-            </label>
-            <input
-              type="email"
-              className="tt-input"
-              required
-              value={passwordForm.email}
-              onChange={(e) => setPasswordForm({ ...passwordForm, email: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '0.625rem 0.875rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(148, 163, 184, 0.3)',
-                background: 'rgba(255, 255, 255, 0.05)',
-                color: '#F8FAFC',
-                fontSize: '0.875rem',
-                boxSizing: 'border-box',
-              }}
-            />
-          </div>
-
-          <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{ display: 'block', fontSize: '0.875rem', color: '#CBD5E1', marginBottom: '0.375rem' }}>
-              رمز التفعيل / الدعوة (token)
-            </label>
-            <input
-              type="text"
-              className="tt-input"
-              required
-              value={passwordForm.token}
-              onChange={(e) => setPasswordForm({ ...passwordForm, token: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '0.625rem 0.875rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(148, 163, 184, 0.3)',
-                background: 'rgba(255, 255, 255, 0.05)',
-                color: '#F8FAFC',
-                fontSize: '0.875rem',
-                boxSizing: 'border-box',
-              }}
-            />
-          </div>
-
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', fontSize: '0.875rem', color: '#CBD5E1', marginBottom: '0.375rem' }}>
-              كلمة المرور الجديدة (new_password)
-            </label>
-            <input
-              type="password"
-              className="tt-input"
-              required
-              placeholder="أدخل كلمة المرور الجديدة"
-              value={passwordForm.new_password}
-              onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '0.625rem 0.875rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(148, 163, 184, 0.3)',
-                background: 'rgba(255, 255, 255, 0.05)',
-                color: '#F8FAFC',
-                fontSize: '0.875rem',
-                boxSizing: 'border-box',
-              }}
-            />
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-            <button
-              type="button"
-              onClick={() => setIsPasswordModalOpen(false)}
-              disabled={isSettingPassword}
-              style={{
-                padding: '0.6rem 1.25rem',
-                borderRadius: '8px',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(148, 163, 184, 0.3)',
-                color: '#CBD5E1',
-                cursor: 'pointer',
-              }}
-            >
-              إلغاء
-            </button>
-            <button
-              type="submit"
-              disabled={isSettingPassword}
-              style={{
-                padding: '0.6rem 1.25rem',
-                borderRadius: '8px',
-                background: '#8B5CF6',
-                border: 'none',
-                color: '#FFFFFF',
-                fontWeight: 600,
-                cursor: isSettingPassword ? 'not-allowed' : 'pointer',
-              }}
-            >
-              {isSettingPassword ? 'جاري الحفظ...' : 'تأكيد كلمة المرور'}
-            </button>
-          </div>
-        </form>
-      </Modal>
-
+      
       {/* Delete Modal */}
       <ConfirmModal
         isOpen={!!deletingId}

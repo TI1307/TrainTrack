@@ -1,30 +1,37 @@
 // frontend/pages/login.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../src/context/AuthContext";
 
-export default function Login() {
+
+export default function UserInvetation() {
   const navigate = useNavigate();
-  const { login } = useAuth();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [notification, setNotification] = useState<{ type: "success" | "error" | null; message: string }>({
     type: null,
     message: "",
   });
-  const [usernameError, setUsernameError] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+
+  const validateEmail = (value: string) => value.includes("@") && value.includes(".");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setUsernameError("");
+    setEmailError("");
     setPasswordError("");
+    setConfirmPasswordError("");
     setNotification({ type: null, message: "" });
 
     let hasError = false;
-    if (!username.trim()) {
-      setUsernameError("اسم المستخدم مطلوب");
+    if (!email) {
+      setEmailError("البريد الإلكتروني مطلوب");
+      hasError = true;
+    } else if (!validateEmail(email)) {
+      setEmailError("يرجى إدخال بريد إلكتروني صحيح");
       hasError = true;
     }
     if (!password) {
@@ -34,19 +41,16 @@ export default function Login() {
       setPasswordError("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
       hasError = true;
     }
-    if (hasError) return;
-
-    setIsLoading(true);
-    try {
-      await login(username, password);
-      setNotification({ type: "success", message: "تم تسجيل الدخول بنجاح! جاري التحويل..." });
-      setTimeout(() => navigate("/"), 800);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "حدث خطأ. يرجى المحاولة مرة أخرى.";
-      setNotification({ type: "error", message: msg });
-    } finally {
-      setIsLoading(false);
+    if (!confirmPassword) {
+      setConfirmPasswordError("تأكيد كلمة المرور مطلوب");
+       hasError = true;
+    } else if (password !== confirmPassword) {
+      setConfirmPasswordError("يرجى إدخال نفس كلمة المرور");
+      hasError = true;
     }
+    if (hasError) return;
+    setIsLoading(true);
+   
   };
 
   return (
@@ -54,10 +58,12 @@ export default function Login() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
 
+        /* Fix: Ensure body and html cover full viewport */
         html, body {
           margin: 0;
           padding: 0;
           min-height: 100vh;
+          min-height: 100dvh; /* For dynamic viewport height on mobile */
         }
 
         @keyframes slideDown {
@@ -93,24 +99,8 @@ export default function Login() {
       `}</style>
 
       <div style={styles.card}>
-        <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '44px',
-            height: '44px',
-            borderRadius: '10px',
-            background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
-            color: '#fff',
-            fontWeight: 900,
-            fontSize: '1rem',
-            letterSpacing: '-1px',
-            marginBottom: '0.5rem',
-          }}>TT</div>
-          <h1 style={styles.title}>TrainTrack Admin</h1>
-          <p style={styles.subtitle}>سجل الدخول إلى لوحة إدارة القطارات</p>
-        </div>
+        <h1 style={styles.title}>  TrainTrack مرحباً بك في </h1>
+        <p style={styles.subtitle}>  يرجى ادخال كلمة المرور لتفعيل حسابك</p>
 
         {notification.type && (
           <div style={{ ...styles.notification, background: notification.type === "success" ? "#10b981" : "#ef4444" }}>
@@ -123,19 +113,19 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} noValidate>
           <div style={styles.formGroup}>
-            <label style={styles.label}>اسم المستخدم</label>
+            <label style={styles.label}>البريد الإلكتروني</label>
             <input
-              className={`tt-input${usernameError ? " error" : ""}`}
-              type="text"
-              placeholder="مثال: admin"
-              value={username}
+              className={`tt-input${emailError ? " error" : ""}`}
+              type="email"
+              placeholder="example@email.com"
+              value={email}
               onChange={(e) => {
-                setUsername(e.target.value);
-                setUsernameError("");
+                setEmail(e.target.value);
+                setEmailError("");
               }}
               style={styles.input}
             />
-            {usernameError && <div style={styles.errorMessage}>{usernameError}</div>}
+            {emailError && <div style={styles.errorMessage}>{emailError}</div>}
           </div>
 
           <div style={styles.formGroup}>
@@ -143,7 +133,7 @@ export default function Login() {
             <input
               className={`tt-input${passwordError ? " error" : ""}`}
               type="password"
-              placeholder="أدخل كلمة المرور (مثال: admin123)"
+              placeholder="أدخل كلمة المرور"
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
@@ -152,6 +142,27 @@ export default function Login() {
               style={styles.input}
             />
             {passwordError && <div style={styles.errorMessage}>{passwordError}</div>}
+          </div>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>تاكيد كلمة المرور </label>
+            <input
+              className={`tt-input${confirmPasswordError ? " error" : ""}`}
+              type="password"
+              placeholder="يرجى تاكيد كلمة المرور"
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                setConfirmPasswordError("");
+              }}
+              style={styles.input}
+            />
+            {confirmPasswordError && <div style={styles.errorMessage}>{confirmPasswordError}</div>}
+          </div>
+
+          <div style={styles.options}>
+            <button type="button" style={styles.forgotButton}>
+              نسيت كلمة المرور؟
+            </button>
           </div>
 
           <button
@@ -170,10 +181,6 @@ export default function Login() {
             )}
           </button>
         </form>
-
-        <div style={{ marginTop: '1.25rem', textAlign: 'center', fontSize: '0.8rem', color: '#64748B' }}>
-          بيانات تجريبية: اسم المستخدم <strong>admin</strong> | كلمة المرور <strong>admin123</strong>
-        </div>
       </div>
     </div>
   );
@@ -181,7 +188,7 @@ export default function Login() {
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    position: "fixed",
+    position: "fixed", // Fix: Use fixed positioning to cover entire viewport
     top: 0,
     left: 0,
     right: 0,
@@ -192,31 +199,33 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "1rem",
     fontFamily: "'Tajawal', sans-serif",
     background: "radial-gradient(circle at 30% 20%, #101E3B 0%, #0A1428 55%, #060B18 100%)",
-    direction: "rtl",
-    overflow: "auto",
+    backgroundAttachment: "fixed", // Ensure gradient covers everything
+    overflow: "auto", // Allow scrolling if needed
   },
   card: {
     width: "100%",
-    maxWidth: "550px",
+    maxWidth: "600px",
     background: "rgba(255,255,255,0.04)",
     border: "1px solid rgba(148, 163, 184, 0.25)",
     borderRadius: "16px",
     padding: "2rem",
     boxSizing: "border-box",
-    backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)",
+    backdropFilter: "blur(10px)", // Optional: adds glass effect
+    WebkitBackdropFilter: "blur(10px)", // For Safari
   },
   title: {
     fontSize: "1.5rem",
-    fontWeight: 800,
+    fontWeight: 700,
     color: "#F8FAFC",
     margin: 0,
+    textAlign: "center",
   },
   subtitle: {
     color: "#94A3B8",
     marginTop: "0.25rem",
-    marginBottom: "0.5rem",
+    marginBottom: "1.5rem",
     fontSize: "0.875rem",
+    textAlign: "center",
   },
   formGroup: {
     marginBottom: "1.25rem",
@@ -238,17 +247,29 @@ const styles: Record<string, React.CSSProperties> = {
     color: "#F8FAFC",
     boxSizing: "border-box",
   },
+  options: {
+    display: "flex",
+    justifyContent: "flex-end",
+    marginBottom: "1.5rem",
+  },
+  forgotButton: {
+    fontSize: "0.875rem",
+    color: "#3B82F6",
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: 500,
+  },
   loginButton: {
     width: "100%",
-    padding: "0.75rem",
+    padding: "0.625rem",
     background: "#2563eb",
     color: "white",
     border: "none",
     borderRadius: "8px",
-    fontSize: "0.95rem",
+    fontSize: "0.875rem",
     fontWeight: 600,
     cursor: "pointer",
-    marginTop: "0.5rem",
   },
   loginButtonDisabled: {
     opacity: 0.7,

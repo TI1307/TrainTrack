@@ -42,9 +42,9 @@ export const initialTrains: Train[] = [
 ];
 
 export const initialAdminUsers: AdminUser[] = [
-  { id: 1, username: 'admin', email: 'admin@traintrack.dz' },
-  { id: 2, username: 'supervisor_oran', email: 'oran.admin@traintrack.dz' },
-  { id: 3, username: 'supervisor_east', email: 'east.admin@traintrack.dz' },
+  { id: 1, username: 'admin', email: 'admin@traintrack.dz' ,status:'active'},
+  { id: 2, username: 'supervisor_oran', email: 'oran.admin@traintrack.dz' ,status:'disabled' },
+  { id: 3, username: 'supervisor_east', email: 'east.admin@traintrack.dz' ,status:'pending'},
 ];
 
 export const initialLines: Line[] = [
