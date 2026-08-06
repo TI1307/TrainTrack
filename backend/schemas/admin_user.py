@@ -5,7 +5,7 @@ class adminCreate (BaseModel):
     email:str
 class adminPasswordCreate (BaseModel):
     email:str
-    new_password:str
+    password:str
     token:str
 
 class adminRead(BaseModel): 

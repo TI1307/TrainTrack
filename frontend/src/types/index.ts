@@ -28,6 +28,7 @@ export interface AdminUser {
   username: string;
   email: string;
   status:AccountStatus;
+  token:string;
 }
 
 export interface Line {

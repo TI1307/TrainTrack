@@ -1,10 +1,14 @@
 // frontend/pages/login.tsx
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate , useSearchParams} from "react-router-dom";
+import {setAdminPassword} from "../api/adminUsers";
+import { ErrorMessage } from '../src/components/common/ErrorMessage';
 
-
-export default function UserInvetation() {
+export default function SetPassword() {
   const navigate = useNavigate();
+  //get the token value from the url 
+  const [searchParams]=useSearchParams();
+  const token = searchParams.get("token");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -18,13 +22,16 @@ export default function UserInvetation() {
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
   const validateEmail = (value: string) => value.includes("@") && value.includes(".");
+  if (!token){
+    alert("invalid or missing token");
+    return;
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setEmailError("");
     setPasswordError("");
     setConfirmPasswordError("");
-    setNotification({ type: null, message: "" });
 
     let hasError = false;
     if (!email) {
@@ -50,6 +57,14 @@ export default function UserInvetation() {
     }
     if (hasError) return;
     setIsLoading(true);
+    try{
+      await setAdminPassword({email,password,token});
+      navigate('/login');
+    }catch(err){
+      setNotification({ type: "error", message: "فشل تعيين كلمة المرور، تحقق من صحة الرمز" });
+    }finally{
+      setIsLoading(false);
+    }
    
   };
 

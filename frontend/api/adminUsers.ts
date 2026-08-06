@@ -13,3 +13,7 @@ export function createAdminUser(data:{username :string , email :string }){
 export function deleteAdminUser(Id:number){
     return client.delete(`/admin_users/${Id}` ).then(res=>res.data);
 }
+//set Password for an admin 
+export function setAdminPassword(data:{ email: string , password:string ,token:string}){
+    return client.post('/admin_users/set-password/' ,data ).then(res=>res.data);
+}

@@ -60,7 +60,7 @@ def create_password (admin :adminPasswordCreate , db: Session=Depends(get_db) ):
         raise HTTPException (status_code=409 , detail="رمز الدعوة غير صالح أو انتهت صلاحيته")
 
     update_admin.status="active"
-    update_admin.password_hash =hash_password (admin.new_password)
+    update_admin.password_hash =hash_password (admin.password)
     update_admin.invite_token_hash = None
     update_admin.invite_token_expires_at=None
     db.commit()

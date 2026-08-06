@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { Layout } from './components/common/Layout';
 
 import Login from '../pages/login';
-import UserInvetation from '../pages/setPassword';
+import SetPassword from '../pages/SetPassword';
 import Dashboard from '../pages/Dashboard';
 import Stations from '../pages/Stations';
 import Trains from '../pages/Trains';
@@ -92,6 +92,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <AdminUsers />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/set-password"
+        element={
+          <ProtectedRoute>
+            <SetPassword />
           </ProtectedRoute>
         }
       />
