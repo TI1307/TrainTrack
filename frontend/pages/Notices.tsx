@@ -28,10 +28,12 @@ export default function Notices() {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNotice, setEditingNotice] = useState<Notice | null>(null);
-  const [attachType, setAttachType] = useState<'line' | 'station' | 'trip'>('line');
-  const [formLineId, setFormLineId] = useState<number>(1);
-  const [formStationId, setFormStationId] = useState<number>(1);
-  const [formTripId, setFormTripId] = useState<number>(1);
+  const [attachLine, setAttachLine] = useState(false);
+  const [attachStation, setAttachStation] = useState(false);
+  const [attachTrip, setAttachTrip] = useState(false);
+  const [formLineId, setFormLineId] = useState<number |undefined>(1);
+  const [formStationId, setFormStationId] = useState<number |undefined>(1);
+  const [formTripId, setFormTripId] = useState<number |undefined >(1);
   const [message, setMessage] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
@@ -87,7 +89,9 @@ export default function Notices() {
   const handleOpenAddModal = () => {
     setEditingNotice(null);
     setMessage('');
-    setAttachType('line');
+    setAttachLine(false);
+    setAttachStation(false);
+    setAttachTrip(false);
     setIsModalOpen(true);
   };
 
@@ -112,9 +116,19 @@ export default function Notices() {
         const payload: { line_id?: number ; station_id?: number ; trip_id?: number ; message: string  } = {
           message,
         };
-        if (attachType === 'line') payload.line_id = formLineId;
-        if (attachType === 'station') payload.station_id = formStationId;
-        if (attachType === 'trip') payload.trip_id = formTripId;
+        if (attachLine) {
+          payload.line_id = formLineId;
+        }
+        if (attachStation){
+           payload.station_id = formStationId;
+        }
+        if (attachTrip){
+           payload.trip_id = formTripId;
+        }
+        if(!attachLine && !attachTrip && !attachStation){
+          setError('يجب اختيار خط أو محطة أو رحلة واحدة على الأقل');
+          return;
+        }
 
         await createNotice(payload);
       }
@@ -323,14 +337,14 @@ export default function Notices() {
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button
                     type="button"
-                    onClick={() => setAttachType('line')}
+                    onClick={() => setAttachLine(true)}
                     style={{
                       flex: 1,
                       padding: '0.5rem',
                       borderRadius: '8px',
-                      border: attachType === 'line' ? '2px solid #3B82F6' : '1px solid rgba(148,163,184,0.3)',
-                      background: attachType === 'line' ? 'rgba(59,130,246,0.2)' : 'transparent',
-                      color: attachType === 'line' ? '#60A5FA' : '#94A3B8',
+                      border: attachLine  ? '2px solid #3B82F6' : '1px solid rgba(148,163,184,0.3)',
+                      background: attachLine  ? 'rgba(59,130,246,0.2)' : 'transparent',
+                      color: attachLine ? '#60A5FA' : '#94A3B8',
                       fontWeight: 600,
                       cursor: 'pointer',
                       fontSize: '0.85rem',
@@ -341,14 +355,14 @@ export default function Notices() {
 
                   <button
                     type="button"
-                    onClick={() => setAttachType('station')}
+                    onClick={() => setAttachStation(true)}
                     style={{
                       flex: 1,
                       padding: '0.5rem',
                       borderRadius: '8px',
-                      border: attachType === 'station' ? '2px solid #3B82F6' : '1px solid rgba(148,163,184,0.3)',
-                      background: attachType === 'station' ? 'rgba(59,130,246,0.2)' : 'transparent',
-                      color: attachType === 'station' ? '#60A5FA' : '#94A3B8',
+                      border: attachStation  ? '2px solid #3B82F6' : '1px solid rgba(148,163,184,0.3)',
+                      background: attachStation  ? 'rgba(59,130,246,0.2)' : 'transparent',
+                      color: attachStation  ? '#60A5FA' : '#94A3B8',
                       fontWeight: 600,
                       cursor: 'pointer',
                       fontSize: '0.85rem',
@@ -359,14 +373,14 @@ export default function Notices() {
 
                   <button
                     type="button"
-                    onClick={() => setAttachType('trip')}
+                    onClick={() => setAttachTrip(true)}
                     style={{
                       flex: 1,
                       padding: '0.5rem',
                       borderRadius: '8px',
-                      border: attachType === 'trip' ? '2px solid #3B82F6' : '1px solid rgba(148,163,184,0.3)',
-                      background: attachType === 'trip' ? 'rgba(59,130,246,0.2)' : 'transparent',
-                      color: attachType === 'trip' ? '#60A5FA' : '#94A3B8',
+                      border: attachTrip ? '2px solid #3B82F6' : '1px solid rgba(148,163,184,0.3)',
+                      background: attachTrip ? 'rgba(59,130,246,0.2)' : 'transparent',
+                      color: attachTrip ? '#60A5FA' : '#94A3B8',
                       fontWeight: 600,
                       cursor: 'pointer',
                       fontSize: '0.85rem',
@@ -379,7 +393,7 @@ export default function Notices() {
 
               {/* Target Entity Select */}
               <div style={{ marginBottom: '1.25rem' }}>
-                {attachType === 'line' && (
+                {attachLine && (
                   <div>
                     <label style={{ display: 'block', fontSize: '0.85rem', color: '#CBD5E1', marginBottom: '0.35rem' }}>اختر الخط (line_id)</label>
                     <select
@@ -395,7 +409,7 @@ export default function Notices() {
                   </div>
                 )}
 
-                {attachType === 'station' && (
+                {attachStation && (
                   <div>
                     <label style={{ display: 'block', fontSize: '0.85rem', color: '#CBD5E1', marginBottom: '0.35rem' }}>اختر المحطة (station_id)</label>
                     <select
@@ -411,7 +425,7 @@ export default function Notices() {
                   </div>
                 )}
 
-                {attachType === 'trip' && (
+                {attachTrip && (
                   <div>
                     <label style={{ display: 'block', fontSize: '0.85rem', color: '#CBD5E1', marginBottom: '0.35rem' }}>اختر الرحلة (trip_id)</label>
                     <select
