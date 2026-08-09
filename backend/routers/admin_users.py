@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from database import get_db 
 import models 
 from schemas.admin_user import adminCreate , adminPasswordCreate ,adminRead
-from routers.auth import require_super_admin 
+from routers.auth import require_super_admin , get_current_admin 
 from security import hash_invite_token ,generate_token ,get_invite_expiry ,hash_password
 from utils.email import send_invite_email
 from datetime import timezone , datetime 
@@ -12,7 +12,7 @@ router=APIRouter (prefix ="/admin_users" , tags=["admin_users"])
 
 #GET /USERS
 @router.get ( "/" , response_model = list[adminRead] )
-def get_users (db:Session =Depends(get_db) ,current_admin : models.Admin=Depends(require_super_admin )):
+def get_users (db:Session =Depends(get_db) ,current_admin : models.Admin=Depends(get_current_admin )):
     return db.query(models.Admin).all()
 
 #Get /users{id}

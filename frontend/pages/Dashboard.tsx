@@ -2,50 +2,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StatCard } from '../src/components/common/StatCard';
-import { mockService } from '../src/services/mockService';
 import { ErrorMessage } from '../src/components/common/ErrorMessage';
+import { useDashboardStats } from '../src/hooks/useDashboardStats';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [stats, setStats] = useState({
-    stations: 0,
-    trains: 0,
-    lines: 0,
-    wilayas: 0,
-    notices: 0,
-    admins: 0,
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchStats() {
-      setIsLoading(true);
-      try {
-        const [st, tr, ln, wl, nt, ad] = await Promise.all([
-          mockService.getStations(),
-          mockService.getTrains(),
-          mockService.getLines(),
-          mockService.getWilayas(),
-          mockService.getNotices(),
-          mockService.getAdminUsers(),
-        ]);
-        setStats({
-          stations: st.length,
-          trains: tr.length,
-          lines: ln.length,
-          wilayas: wl.length,
-          notices: nt.length,
-          admins: ad.length,
-        });
-      } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'حدث خطأ أثناء تحميل الإحصائيات');
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchStats();
-  }, []);
+  const { stats, isLoading, error , clearError} = useDashboardStats();
 
   const statItems = [
     { title: 'إجمالي المحطات', value: stats.stations, color: '#3B82F6', path: '/stations', subtitle: 'محطات السكك عبر الولايات' },
@@ -67,7 +29,7 @@ export default function Dashboard() {
         </p>
       </div>
 
-      <ErrorMessage error={error} onClear={() => setError(null)} />
+      <ErrorMessage error={error} onClear={clearError} />
 
       {isLoading ? (
         <div style={{ textAlign: 'center', padding: '4rem', color: '#94A3B8' }}>
