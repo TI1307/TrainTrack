@@ -1,12 +1,14 @@
 // frontend/pages/TicketConfig.tsx
 import { useEffect, useState } from 'react';
 import type { TicketClass, TicketClassType, Station, PriceResponse } from '../src/types';
-import { mockService } from '../src/services/mockService';
 import { DataTable, type Column } from '../src/components/common/DataTable';
 import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
 import { Badge } from '../src/components/common/Badge';
 import { ErrorMessage } from '../src/components/common/ErrorMessage';
+import { getTicketClasses, createTicketClass, updateTicketClass, deleteTicketClass, calculatePrice } from '../api/ticketConfig';
+import { getStations } from '../api/station';
+
 
 export default function TicketConfig() {
   const [ticketClasses, setTicketClasses] = useState<TicketClass[]>([]);
@@ -39,7 +41,7 @@ export default function TicketConfig() {
   const fetchInitialData = async () => {
     setIsLoading(true);
     try {
-      const [tcList, stList] = await Promise.all([mockService.getTicketClasses(), mockService.getStations()]);
+      const [tcList, stList] = await Promise.all([getTicketClasses(), getStations()]);
       setTicketClasses(tcList);
       setStations(stList);
 
@@ -79,12 +81,9 @@ export default function TicketConfig() {
     setError(null);
     try {
       if (editingClass) {
-        await mockService.updateTicketClass(editingClass.id, {
-          classtype: form.classtype,
-          Rate_Per_Km: Number(form.Rate_Per_Km),
-        });
+        await updateTicketClass(editingClass.id, { classtype: form.classtype, Rate_Per_Km: Number(form.Rate_Per_Km) });
       } else {
-        await mockService.createTicketClass({
+        await createTicketClass({
           classtype: form.classtype,
           Rate_Per_Km: Number(form.Rate_Per_Km),
         });
@@ -103,7 +102,7 @@ export default function TicketConfig() {
     setIsDeleting(true);
     setError(null);
     try {
-      await mockService.deleteTicketClass(deletingId);
+      await deleteTicketClass(deletingId);
       setDeletingId(null);
       await fetchInitialData();
     } catch (err: unknown) {
@@ -122,7 +121,7 @@ export default function TicketConfig() {
     setIsCalculating(true);
     setCalcError(null);
     try {
-      const res = await mockService.calculatePrice({
+      const res = await calculatePrice({
         from_station_id: calcFromStationId,
         to_station_id: calcToStationId,
         ticket_class_id: calcTicketClassId,
