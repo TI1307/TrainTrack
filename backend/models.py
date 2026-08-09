@@ -27,6 +27,7 @@ class TripStatus(str, enum.Enum):
 class classType(str, enum.Enum):
     first_class = "first_class"
     economy = "economy"
+    intra_wilaya = "intra_wilaya"
 
 
 class Train(Base):
