@@ -42,7 +42,10 @@ export default function Login() {
       setNotification({ type: "success", message: "تم تسجيل الدخول بنجاح! جاري التحويل..." });
       setTimeout(() => navigate("/"), 800);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "حدث خطأ. يرجى المحاولة مرة أخرى.";
+      // Extract the backend's detail message from Axios errors (e.g. 401 with { detail: "..." })
+      type AxiosLike = { response?: { data?: { detail?: string } } };
+      const axiosDetail = (err as AxiosLike)?.response?.data?.detail;
+      const msg = axiosDetail ?? (err instanceof Error ? err.message : "حدث خطأ. يرجى المحاولة مرة أخرى.");
       setNotification({ type: "error", message: msg });
     } finally {
       setIsLoading(false);
@@ -94,20 +97,6 @@ export default function Login() {
 
       <div style={styles.card}>
         <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '44px',
-            height: '44px',
-            borderRadius: '10px',
-            background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
-            color: '#fff',
-            fontWeight: 900,
-            fontSize: '1rem',
-            letterSpacing: '-1px',
-            marginBottom: '0.5rem',
-          }}>TT</div>
           <h1 style={styles.title}>TrainTrack Admin</h1>
           <p style={styles.subtitle}>سجل الدخول إلى لوحة إدارة القطارات</p>
         </div>
@@ -127,7 +116,7 @@ export default function Login() {
             <input
               className={`tt-input${usernameError ? " error" : ""}`}
               type="text"
-              placeholder="مثال: admin"
+              placeholder="أدخل اسم المستخدم "
               value={username}
               onChange={(e) => {
                 setUsername(e.target.value);
@@ -143,7 +132,7 @@ export default function Login() {
             <input
               className={`tt-input${passwordError ? " error" : ""}`}
               type="password"
-              placeholder="أدخل كلمة المرور (مثال: admin123)"
+              placeholder="أدخل كلمة المرور "
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
@@ -170,10 +159,6 @@ export default function Login() {
             )}
           </button>
         </form>
-
-        <div style={{ marginTop: '1.25rem', textAlign: 'center', fontSize: '0.8rem', color: '#64748B' }}>
-          بيانات تجريبية: اسم المستخدم <strong>admin</strong> | كلمة المرور <strong>admin123</strong>
-        </div>
       </div>
     </div>
   );

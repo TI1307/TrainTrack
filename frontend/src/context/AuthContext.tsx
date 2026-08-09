@@ -1,7 +1,7 @@
 // frontend/src/context/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { AdminUser } from '../types';
-import { mockService } from '../services/mockService';
+import { authService } from '../services/authService';
 
 interface AuthContextType {
   token: string | null;
@@ -23,7 +23,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     async function checkAuth() {
       if (token) {
         try {
-          const me = await mockService.me(token);
+          const me = await authService.me(token);
           setUser(me);
         } catch {
           localStorage.removeItem('traintrack_token');
@@ -37,16 +37,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [token]);
 
   const login = async (username: string, password: string) => {
-    const res = await mockService.login(username, password);
+    const res = await authService.login(username, password);
     localStorage.setItem('traintrack_token', res.access_token);
     setToken(res.access_token);
-    const me = await mockService.me(res.access_token);
+    const me = await authService.me(res.access_token);
     setUser(me);
   };
 
   const logout = async () => {
     try {
-      await mockService.logout();
+      await authService.logout();
     } finally {
       localStorage.removeItem('traintrack_token');
       setToken(null);

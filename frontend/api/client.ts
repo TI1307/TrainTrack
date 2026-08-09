@@ -1,15 +1,13 @@
-import axios from'axios';
+import axios from "axios";
 
 const client = axios.create({
-    baseURL:"http://192.168.100.3:8000",
-})
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+});
 
-// Add the access token to the config's Authorization header before each request.
-client.interceptors.request.use((config)=>{
-  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdXBlcmFkbWluIiwiZXhwIjoxNzg2MDMxNTU1fQ.VfU2BABfpXkFTTZYcg4D4zX_fbMqN36cZKrtg-ztIKo';
-  if(token){
-    config.headers.Authorization= `Bearer ${token}`;  
-  }
+client.interceptors.request.use((config) => {
+  const token = localStorage.getItem("traintrack_token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
-})
-export default client ;
+});
+
+export default client;
