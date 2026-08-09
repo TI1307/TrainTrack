@@ -5,9 +5,11 @@ import { Ionicons } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { FlatList } from "react-native";
 import TrainCard from "../components/TrainCard";
-import { mockTrains } from "../data/mockTrains";
 import  {get_notices} from "../api/passenger";
-
+import { searchTrips } from "../api/passenger";
+import { getTripPath } from "../api/tracking";
+import { mapTripToTrainCard } from "../utils/tripMappers";
+import type { TripSearchResult, Notice, StopStatus } from "../types";
 
 
 const NAVY = "#0B3D6B";
@@ -26,13 +28,27 @@ export default function SearchResultsScreen({ from , to ,fromStationId, toStatio
   const sheetRef = useRef(null);
   const snapPoints = useMemo(() => ["25%", "40%", "70%", "90%"], []);
   const [selectedTrainId, setSelectedTrainId] = useState<string | null>(null);
-  const [notices, setNotices] = useState<any[]>([]);
-  const selectedTrain = mockTrains.find((t) => t.id === selectedTrainId) ?? null;
-  useEffect (()=>{
-    get_notices(fromStationId , toStationId ).then( data =>{
-       setNotices(data);
-    });
-},[ fromStationId ,toStationId]);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [trips, setTrips] = useState<TripSearchResult[]>([]);
+
+   const [pathsById, setPathsById] = useState<Record<number, StopStatus[]>>({});
+
+  useEffect(() => {
+    searchTrips(fromStationId, toStationId).then(setTrips);
+    get_notices(fromStationId, toStationId).then(setNotices);
+  }, [fromStationId, toStationId]);
+
+  const handleSelectTrain = (tripId: number) => {
+    const idStr = String(tripId);
+    setSelectedTrainId((prev) => (prev === idStr ? null : idStr));
+
+    if (!pathsById[tripId]) {
+      getTripPath(tripId).then((path) => {
+        setPathsById((prev) => ({ ...prev, [tripId]: path }));
+      });
+    }
+  };
+
 
   return (
     <View style={styles.container}>
@@ -76,17 +92,18 @@ export default function SearchResultsScreen({ from , to ,fromStationId, toStatio
           <Text style={styles.sheetSubtitle}>اختر قطارًا لعرض تفاصيل المسار</Text>
 
           <FlatList
-            data={mockTrains}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TrainCard
-                train={item}
-                isExpanded={selectedTrainId === item.id}
-                onPress={() =>
-                  setSelectedTrainId((prev) => (prev === item.id ? null : item.id))
-                }
-              />
-            )}
+            data={trips}
+            keyExtractor={(item) => String(item.trip_id)}
+            renderItem={({ item }) => {
+              const train = mapTripToTrainCard(item, from, to, pathsById[item.trip_id]);
+              return (
+                <TrainCard
+                  train={train}
+                  isExpanded={selectedTrainId === String(item.trip_id)}
+                  onPress={() => handleSelectTrain(item.trip_id)}
+                />
+              );
+            }}
           />
         </BottomSheetView>
       </BottomSheet>

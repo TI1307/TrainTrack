@@ -3,10 +3,12 @@ import SplashScreen from "./screens/SplashScreen";
 import HomeScreen from "./screens/HomeScreen";
 import SearchResultsScreen from "./screens/SearchResultsScreen";
 
-type SearchParams={
+type SearchParams = {
   from: string;
-  to:string;
-  date:Date;
+  to: string;
+  date: Date;
+  fromStationId: number;
+  toStationId: number;
 };
 export default function App(){
   const [loading , setLoading]=useState(true);  //splash ->home page 
@@ -25,11 +27,13 @@ export default function App(){
   }
     if (screen === "searchResults" && searchParams) {
     return <SearchResultsScreen
-        from={searchParams?.from}
-        to={searchParams?.to}
-        date={searchParams?.date}
-        onBack={() => setScreen("home")}
-      />;
+  from={searchParams.from}
+  to={searchParams.to}
+  fromStationId={searchParams.fromStationId}
+  toStationId={searchParams.toStationId}
+  date={searchParams.date}
+  onBack={() => setScreen("home")}
+/>;
   }
 
   return (

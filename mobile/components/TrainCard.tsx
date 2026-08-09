@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Train } from "../types/train";
+import { Train } from "../types";
 import { rgbaColor } from "react-native-reanimated/lib/typescript/Colors";
 
 const NAVY = "#0B3D6B";
