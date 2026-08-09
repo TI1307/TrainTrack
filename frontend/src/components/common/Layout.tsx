@@ -285,21 +285,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             </h2>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <span
-              style={{
-                fontSize: '0.775rem',
-                padding: '0.35rem 0.75rem',
-                borderRadius: '9999px',
-                background: 'rgba(34, 197, 94, 0.15)',
-                color: '#4ADE80',
-                border: '1px solid rgba(34, 197, 94, 0.3)',
-                fontWeight: 600,
-              }}
-            >
-              ● النظام متصل
-            </span>
-          </div>
         </header>
 
         {/* Main Body */}
