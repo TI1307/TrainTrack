@@ -52,13 +52,14 @@ export default function HomeScreen({ onSearch }) {
   const [toStation, setToStation] = useState(""); // to store the station to the full object   
 
   const [activeField, setActiveField] = useState(null);
-// ticket class (first_class / economy) — only required for inter-wilaya trips
+// ticket class (first_class / economy / intra_wilaya) — only required for inter-wilaya trips
   const [ticketClass, setTicketClass] = useState(null);
   const [classModalVisible, setClassModalVisible] = useState(false);
 
   const CLASS_OPTIONS = [
     { key: "first_class", label: "الدرجة الأولى" },
     { key: "economy", label: "اقتصادية" },
+    
   ];
 
   // is this trip between two different wilayas?
@@ -86,9 +87,11 @@ export default function HomeScreen({ onSearch }) {
     // given the newly-picked "from" and "to" stations, decide whether to prompt for class
   const checkClassPrompt = (from, to) => {
     if (from && to) { //Make sure both stations are selected
-      setTicketClass(null); // reset previous choice whenever the route changes
       if (from.wilaya_id !== to.wilaya_id) {
-        setClassModalVisible(true);
+        setTicketClass(null);
+        setClassModalVisible(true);}
+      else {
+        setTicketClass("intra_wilaya");
       }
     }
   };
@@ -371,13 +374,14 @@ export default function HomeScreen({ onSearch }) {
               setClassModalVisible(true);
               return;
             }
+            const selectedTicketClass = ticketClass ?? "intra_wilaya";
             onSearch({
               fromStationId,
               toStationId,
               from: fromSearch,
               to: toSearch,
               date: days[selectedDayIndex].date,
-              ticketClass, // "first_class" | "economy" | null (null = intra-wilaya, no class needed)
+              ticketClass: selectedTicketClass,
             });
           }}
         >

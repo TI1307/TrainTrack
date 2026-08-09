@@ -142,8 +142,10 @@ export default function TicketConfig() {
       render: (tc) =>
         tc.classtype === 'first_class' ? (
           <Badge type="primary">الدرجة الأولى (first_class)</Badge>
-        ) : (
+        ) : tc.classtype === 'economy' ? (
           <Badge type="info">الدرجة الاقتصادية (economy)</Badge>
+        ) : (
+          <Badge type="success">داخل الولاية (intra_wilaya)</Badge>
         ),
     },
     {
@@ -423,6 +425,7 @@ export default function TicketConfig() {
             >
               <option value="first_class">الدرجة الأولى (first_class)</option>
               <option value="economy">الدرجة الاقتصادية (economy)</option>
+              <option value="intra_wilaya">داخل الولاية (intra_wilaya)</option>
             </select>
           </div>
 

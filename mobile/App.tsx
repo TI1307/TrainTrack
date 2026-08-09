@@ -9,6 +9,7 @@ type SearchParams = {
   date: Date;
   fromStationId: number;
   toStationId: number;
+  ticketClass: "first_class" | "economy" | "intra_wilaya";
 };
 export default function App(){
   const [loading , setLoading]=useState(true);  //splash ->home page 
@@ -32,6 +33,7 @@ export default function App(){
   fromStationId={searchParams.fromStationId}
   toStationId={searchParams.toStationId}
   date={searchParams.date}
+  ticketClass={searchParams.ticketClass}
   onBack={() => setScreen("home")}
 />;
   }

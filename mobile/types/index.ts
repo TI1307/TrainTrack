@@ -60,3 +60,14 @@ export type Train = {
   isCurrent: boolean;
   stops: Stop[];
 };
+
+export type TicketClass = {
+  id: number;
+  classtype: "first_class" | "economy" | "intra_wilaya";
+  Rate_Per_Km: number;
+};
+
+export type PriceResponse = {
+  distance_km: number;
+  price: number;
+};

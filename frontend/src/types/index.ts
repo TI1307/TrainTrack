@@ -2,7 +2,7 @@
 
 export type TripStatus = 'working' | 'not_working';
 export type TripType = 'inter_Wilaya' | 'intra_Wilaya';
-export type TicketClassType = 'first_class' | 'economy';
+export type TicketClassType = 'first_class' | 'economy' | "intra_wilaya";
 export type AccountStatus='pending'| 'active' |'disabled';
 
 export interface Station {
