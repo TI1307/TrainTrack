@@ -34,6 +34,8 @@ export default function SearchResultsScreen({ from, to, fromStationId, toStation
   const [selectedTrainId, setSelectedTrainId] = useState<string | null>(null);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [pathsById, setPathsById] = useState<Record<number, StopStatus[]>>({});
+  const [showAllNotices, setShowAllNotices] = useState(false);
+  const [noticesDismissed, setNoticesDismissed] = useState(false); 
 
   const [trips, setTrips] = useState<TripSearchResult[]>([]);
   const [isLoadingTrips, setIsLoadingTrips] = useState(true);
@@ -97,18 +99,51 @@ export default function SearchResultsScreen({ from, to, fromStationId, toStation
           <Ionicons name="arrow-forward" size={24} color={NAVY} />
         </Pressable>
       </View>
+{notices.length > 0 && !noticesDismissed && (
+  <View style={styles.noticeCard}>
+    <View style={styles.noticeTitleRow}>
+      <Pressable onPress={() => setNoticesDismissed(true)} hitSlop={10}>
+        <Ionicons name="close" size={18} color="#888" />
+      </Pressable>
+      <Text style={styles.noticeTitle}>ملاحظات</Text>
+      <Ionicons name="warning" size={18} color="#E8622C" />
+    </View>
 
-      {notices.length > 0 && (
-        <View style={styles.noticeCard}>
-          <View style={styles.noticeTitleRow}>
-            <Ionicons name="warning" size={18} color="#E8622C" />
-            <Text style={styles.noticeTitle}>ملاحظة:</Text>
-          </View>
-          {notices.map((notice) => (
-            <Text key={notice.id} style={styles.noticeText}>{notice.message}</Text>
-          ))}
-        </View>
-      )}
+    {(showAllNotices ? notices : notices.slice(0, 3)).map((notice, index) => (
+      <Text key={notice.id} style={styles.noticeText}>
+        {`ملاحظة ${index + 1}: ${notice.message}`}
+      </Text>
+    ))}
+
+    {notices.length > 3 && (
+      <Pressable
+        onPress={() => setShowAllNotices((prev) => !prev)}
+        style={styles.noticeToggleButton}
+      >
+        <Text style={styles.noticeToggleText}>
+          {showAllNotices ? "عرض أقل" : `عرض الكل (${notices.length})`}
+        </Text>
+        <Ionicons
+          name={showAllNotices ? "chevron-up" : "chevron-down"}
+          size={14}
+          color={NAVY}
+        />
+      </Pressable>
+    )}
+  </View>
+)}
+
+{notices.length > 0 && noticesDismissed && (
+  <Pressable
+    style={styles.noticeIconButton}
+    onPress={() => {
+      setNoticesDismissed(false);
+      setShowAllNotices(true);
+    }}
+  >
+    <Ionicons name="warning" size={22} color="#E8622C" />
+  </Pressable>
+)}
 
       <BottomSheet ref={sheetRef} index={1} snapPoints={snapPoints}>
         <BottomSheetView style={styles.sheetContent}>
@@ -171,4 +206,33 @@ const styles = StyleSheet.create({
   priceText: { textAlign: "center", fontSize: 13, fontWeight: "700", color: GREEN, marginBottom: 8 },
   errorText: { textAlign: "center", fontSize: 13, fontWeight: "600", color: RED, marginTop: 12, marginBottom: 8 },
   emptyText: { textAlign: "center", fontSize: 13, color: "#888", marginTop: 30 },
+  noticeToggleButton: {
+  flexDirection: "row",
+  justifyContent: "center",
+  alignItems: "center",
+  marginTop: 6,
+  paddingVertical: 4,
+},
+noticeToggleText: {
+  color: NAVY,
+  fontSize: 12,
+  fontWeight: "600",
+  marginLeft: 4,
+},
+noticeIconButton: {
+  position: "absolute",
+  top: 110,
+  right: 16,
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  backgroundColor: "rgba(255,255,255,0.95)",
+  justifyContent: "center",
+  alignItems: "center",
+  shadowColor: NAVY,
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.15,
+  shadowRadius: 6,
+  elevation: 4,
+},
 });
