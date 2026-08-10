@@ -13,6 +13,7 @@ export default function SetPassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [successUsername, setSuccessUsername] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ type: "success" | "error" | null; message: string }>({
     type: null,
     message: "",
@@ -22,13 +23,15 @@ export default function SetPassword() {
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
   const validateEmail = (value: string) => value.includes("@") && value.includes(".");
-  if (!token){
-    alert("invalid or missing token");
-    return;
-  }
+  
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+     e.preventDefault();
+     if (!token) {
+    setNotification({ type: "error", message: "الرابط غير صالح أو مفقود" });
+    return;
+  }
+   
     setEmailError("");
     setPasswordError("");
     setConfirmPasswordError("");
@@ -58,8 +61,9 @@ export default function SetPassword() {
     if (hasError) return;
     setIsLoading(true);
     try{
-      await setAdminPassword({email,password,token});
-      navigate('/login');
+      const res =await setAdminPassword({email,password,token});
+      setSuccessUsername(res.username);
+      setTimeout(() => navigate('/login'), 6000);
     }catch(err){
       setNotification({ type: "error", message: "فشل تعيين كلمة المرور، تحقق من صحة الرمز" });
     }finally{
@@ -121,11 +125,18 @@ export default function SetPassword() {
           <div style={{ ...styles.notification, background: notification.type === "success" ? "#10b981" : "#ef4444" }}>
             <span>{notification.message}</span>
             <button onClick={() => setNotification({ type: null, message: "" })} style={styles.closeButton}>
-              ✕
+             
             </button>
           </div>
         )}
-
+       {successUsername && (
+         <div style={{ color: "#10b981", fontSize: "0.9rem", marginBottom: "1rem", textAlign: "center" }}>
+         <strong>{successUsername}</strong>  : تم تفعيل حسابك بنجاح. اسم المستخدم الخاص بك هو 
+         <br />
+           ...سيتم تحويلك إلى صفحة تسجيل الدخول خلال لحظات 
+         
+       </div>
+         )}
         <form onSubmit={handleSubmit} noValidate>
           <div style={styles.formGroup}>
             <label style={styles.label}>البريد الإلكتروني</label>

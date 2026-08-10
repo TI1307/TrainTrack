@@ -64,7 +64,7 @@ def create_password (admin :adminPasswordCreate , db: Session=Depends(get_db) ):
     update_admin.invite_token_hash = None
     update_admin.invite_token_expires_at=None
     db.commit()
-    return {"detail" :"تم تعيين كلمة المرور بنجاح"}
+    return {"detail" :"تم تعيين كلمة المرور بنجاح" , "username" :update_admin.username}
 
 #DELETE /{admin_id}
 

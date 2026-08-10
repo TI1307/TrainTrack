@@ -15,5 +15,5 @@ export function deleteAdminUser(Id:number){
 }
 //set Password for an admin 
 export function setAdminPassword(data:{ email: string , password:string ,token:string}){
-    return client.post('/admin_users/set-password/' ,data ).then(res=>res.data);
+    return client.post('/admin_users/set-password/' ,data ).then(res=>res.data as { detail: string; username: string });
 }

@@ -24,6 +24,7 @@ export default function AdminUsers() {
   // Delete state
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  
 
   const fetchAdmins = async () => {
     setIsLoading(true);

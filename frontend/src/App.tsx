@@ -50,6 +50,15 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/set-password" element={<SetPassword />} />
+       <Route
+        path="/admin-users"
+        element={
+          <ProtectedRoute>
+            <AdminUsers />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/"
@@ -87,22 +96,7 @@ function AppRoutes() {
         }
       />
 
-      <Route
-        path="/admin-users"
-        element={
-          <ProtectedRoute>
-            <AdminUsers />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/set-password"
-        element={
-          <ProtectedRoute>
-            <SetPassword />
-          </ProtectedRoute>
-        }
-      />
+     
 
       <Route
         path="/lines"

@@ -14,7 +14,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 @router.post("/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    admin = db.query(models.Admin).filter(models.Admin.username == form_data.username).first()
+    admin = db.query(models.Admin).filter(
+        (models.Admin.username == form_data.username) | (models.Admin.email == form_data.username)
+    ).first()
     if not admin or not verify_password(form_data.password, admin.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="اسم المستخدم أو كلمة المرور غير صحيحة")
     token = create_access_token({"sub": admin.username})
