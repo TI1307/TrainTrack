@@ -1,14 +1,14 @@
 import React, { useRef, useMemo, useState, useEffect } from "react";
-import { View, Text, StyleSheet, Pressable, ActivityIndicator, FlatList } from "react-native";
-import MapView, { Polyline, Marker } from "react-native-maps";
+import { View, Text, StyleSheet, Pressable, ActivityIndicator, FlatList, Animated } from "react-native";
+import MapView, { Polyline, Marker, AnimatedRegion } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import TrainCard from "../components/TrainCard";
 import { get_notices, searchTrips } from "../api/passenger";
-import { getTripPath, getLiveTrains, getTripGeometry  } from "../api/tracking";
+import { getTripPath, getLiveTrains, getTripGeometry } from "../api/tracking";
 import { getTicketClasses, calculatePrice } from "../api/ticketConfig";
 import { mapTripToTrainCard } from "../utils/tripMappers";
-import type { TripSearchResult, Notice, StopStatus, PriceResponse , TripGeometry, TrackingRead} from "../types";
+import type { TripSearchResult, Notice, StopStatus, PriceResponse, TripGeometry, TrackingRead } from "../types";
 
 const NAVY = "#0B3D6B";
 const GREEN = "#2E9E5B";
@@ -35,7 +35,7 @@ export default function SearchResultsScreen({ from, to, fromStationId, toStation
   const [notices, setNotices] = useState<Notice[]>([]);
   const [pathsById, setPathsById] = useState<Record<number, StopStatus[]>>({});
   const [showAllNotices, setShowAllNotices] = useState(false);
-  const [noticesDismissed, setNoticesDismissed] = useState(false); 
+  const [noticesDismissed, setNoticesDismissed] = useState(false);
 
   const [trips, setTrips] = useState<TripSearchResult[]>([]);
   const [isLoadingTrips, setIsLoadingTrips] = useState(true);
@@ -48,7 +48,23 @@ export default function SearchResultsScreen({ from, to, fromStationId, toStation
   const [geometry, setGeometry] = useState<TripGeometry | null>(null);
   const [liveTrains, setLiveTrains] = useState<TrackingRead[]>([]);
   const currentTripId = liveTrains[0]?.trip_id ?? null;
+  const animatedCoord = useRef(new AnimatedRegion({
+    latitude: 36.7538, longitude: 3.0588, latitudeDelta: 0, longitudeDelta: 0,
+  })).current;
 
+  useEffect(() => {
+    const current = liveTrains[0];
+    if (!current) return;
+
+    animatedCoord.timing({
+      latitude: current.latitude,
+      longitude: current.longitude,
+      duration: 18000, // slightly under the 20s poll interval, so it finishes before the next update arrives
+      useNativeDriver: false,
+      latitudeDelta: 0,
+      longitudeDelta: 0,
+    } as any).start();
+  }, [liveTrains]);
 
   useEffect(() => {
     setIsLoadingTrips(true);
@@ -81,32 +97,32 @@ export default function SearchResultsScreen({ from, to, fromStationId, toStation
       .finally(() => setIsLoadingPrice(false));
   }, [fromStationId, toStationId, ticketClass]);
 
-useEffect(() => {
-  if (currentTripId === null) {
-    setGeometry(null);
-    return;
-  }
-  getTripGeometry(currentTripId)
-    .then(setGeometry)
-    .catch(() => setGeometry(null));
-}, [currentTripId]);
+  useEffect(() => {
+    if (currentTripId === null) {
+      setGeometry(null);
+      return;
+    }
+    getTripGeometry(currentTripId)
+      .then(setGeometry)
+      .catch(() => setGeometry(null));
+  }, [currentTripId]);
 
-// poll live positions independently, every 20s, cleaned up properly
-useEffect(() => {
-  let active = true;
-  const poll = () => {
-    getLiveTrains(fromStationId, toStationId)
-      .then((data) => { if (active) setLiveTrains(data); })
-      .catch(() => {});
-  };
-  poll();
-  const interval = setInterval(poll, 20000);
-  return () => {
-    active = false;
-    clearInterval(interval);
-  };
-}, [fromStationId, toStationId]);
-  
+  // poll live positions independently, every 20s, cleaned up properly
+  useEffect(() => {
+    let active = true;
+    const poll = () => {
+      getLiveTrains(fromStationId, toStationId)
+        .then((data) => { if (active) setLiveTrains(data); })
+        .catch(() => { });
+    };
+    poll();
+    const interval = setInterval(poll, 20000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [fromStationId, toStationId]);
+
 
   const handleSelectTrain = (tripId: number) => {
     const idStr = String(tripId);
@@ -121,21 +137,21 @@ useEffect(() => {
   return (
     <View style={styles.container}>
       <MapView
-  style={styles.map}
-  initialRegion={{ latitude: 36.7538, longitude: 3.0588, latitudeDelta: 0.1, longitudeDelta: 0.1 }}
->
-  {geometry && (
-    <>
-      <Polyline coordinates={geometry.passed} strokeColor={GREEN} strokeWidth={4} />
-      <Polyline coordinates={geometry.remaining} strokeColor="#B0BEC5" strokeWidth={4} />
-    </>
-  )}
-  {liveTrains.map((t) => (
-    <Marker key={t.trip_id} coordinate={{ latitude: t.latitude, longitude: t.longitude }}>
-      <Ionicons name="train" size={22} color={NAVY} />
-    </Marker>
-  ))}
-</MapView>
+        style={styles.map}
+        initialRegion={{ latitude: 36.7538, longitude: 3.0588, latitudeDelta: 0.1, longitudeDelta: 0.1 }}
+      >
+        {geometry && (
+          <>
+            <Polyline coordinates={geometry.passed} strokeColor={GREEN} strokeWidth={4} />
+            <Polyline coordinates={geometry.remaining} strokeColor="#B0BEC5" strokeWidth={4} />
+          </>
+        )}
+        {liveTrains[0] && (
+          <Marker.Animated coordinate={animatedCoord as any}>
+            <Ionicons name="train" size={22} color={NAVY} />
+          </Marker.Animated>
+        )}
+      </MapView>
 
       <View style={styles.header}>
         <Text style={styles.headerText}>{to} ← {from}</Text>
@@ -143,51 +159,51 @@ useEffect(() => {
           <Ionicons name="arrow-forward" size={24} color={NAVY} />
         </Pressable>
       </View>
-{notices.length > 0 && !noticesDismissed && (
-  <View style={styles.noticeCard}>
-    <View style={styles.noticeTitleRow}>
-      <Pressable onPress={() => setNoticesDismissed(true)} hitSlop={10}>
-        <Ionicons name="close" size={18} color="#888" />
-      </Pressable>
-      <Text style={styles.noticeTitle}>ملاحظات</Text>
-      <Ionicons name="warning" size={18} color="#E8622C" />
-    </View>
+      {notices.length > 0 && !noticesDismissed && (
+        <View style={styles.noticeCard}>
+          <View style={styles.noticeTitleRow}>
+            <Pressable onPress={() => setNoticesDismissed(true)} hitSlop={10}>
+              <Ionicons name="close" size={18} color="#888" />
+            </Pressable>
+            <Text style={styles.noticeTitle}>ملاحظات</Text>
+            <Ionicons name="warning" size={18} color="#E8622C" />
+          </View>
 
-    {(showAllNotices ? notices : notices.slice(0, 3)).map((notice, index) => (
-      <Text key={notice.id} style={styles.noticeText}>
-        {`ملاحظة ${index + 1}: ${notice.message}`}
-      </Text>
-    ))}
+          {(showAllNotices ? notices : notices.slice(0, 3)).map((notice, index) => (
+            <Text key={notice.id} style={styles.noticeText}>
+              {`ملاحظة ${index + 1}: ${notice.message}`}
+            </Text>
+          ))}
 
-    {notices.length > 3 && (
-      <Pressable
-        onPress={() => setShowAllNotices((prev) => !prev)}
-        style={styles.noticeToggleButton}
-      >
-        <Text style={styles.noticeToggleText}>
-          {showAllNotices ? "عرض أقل" : `عرض الكل (${notices.length})`}
-        </Text>
-        <Ionicons
-          name={showAllNotices ? "chevron-up" : "chevron-down"}
-          size={14}
-          color={NAVY}
-        />
-      </Pressable>
-    )}
-  </View>
-)}
+          {notices.length > 3 && (
+            <Pressable
+              onPress={() => setShowAllNotices((prev) => !prev)}
+              style={styles.noticeToggleButton}
+            >
+              <Text style={styles.noticeToggleText}>
+                {showAllNotices ? "عرض أقل" : `عرض الكل (${notices.length})`}
+              </Text>
+              <Ionicons
+                name={showAllNotices ? "chevron-up" : "chevron-down"}
+                size={14}
+                color={NAVY}
+              />
+            </Pressable>
+          )}
+        </View>
+      )}
 
-{notices.length > 0 && noticesDismissed && (
-  <Pressable
-    style={styles.noticeIconButton}
-    onPress={() => {
-      setNoticesDismissed(false);
-      setShowAllNotices(true);
-    }}
-  >
-    <Ionicons name="warning" size={22} color="#E8622C" />
-  </Pressable>
-)}
+      {notices.length > 0 && noticesDismissed && (
+        <Pressable
+          style={styles.noticeIconButton}
+          onPress={() => {
+            setNoticesDismissed(false);
+            setShowAllNotices(true);
+          }}
+        >
+          <Ionicons name="warning" size={22} color="#E8622C" />
+        </Pressable>
+      )}
 
       <BottomSheet ref={sheetRef} index={1} snapPoints={snapPoints}>
         <BottomSheetView style={styles.sheetContent}>
@@ -251,32 +267,32 @@ const styles = StyleSheet.create({
   errorText: { textAlign: "center", fontSize: 13, fontWeight: "600", color: RED, marginTop: 12, marginBottom: 8 },
   emptyText: { textAlign: "center", fontSize: 13, color: "#888", marginTop: 30 },
   noticeToggleButton: {
-  flexDirection: "row",
-  justifyContent: "center",
-  alignItems: "center",
-  marginTop: 6,
-  paddingVertical: 4,
-},
-noticeToggleText: {
-  color: NAVY,
-  fontSize: 12,
-  fontWeight: "600",
-  marginLeft: 4,
-},
-noticeIconButton: {
-  position: "absolute",
-  top: 110,
-  right: 16,
-  width: 40,
-  height: 40,
-  borderRadius: 20,
-  backgroundColor: "rgba(255,255,255,0.95)",
-  justifyContent: "center",
-  alignItems: "center",
-  shadowColor: NAVY,
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.15,
-  shadowRadius: 6,
-  elevation: 4,
-},
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 6,
+    paddingVertical: 4,
+  },
+  noticeToggleText: {
+    color: NAVY,
+    fontSize: 12,
+    fontWeight: "600",
+    marginLeft: 4,
+  },
+  noticeIconButton: {
+    position: "absolute",
+    top: 110,
+    right: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.95)",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: NAVY,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
+  },
 });
