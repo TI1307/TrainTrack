@@ -13,19 +13,20 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const navItems = [
-    { path: '/', label: 'الرئيسية والإحصائيات' },
-    { path: '/stations', label: 'المحطات' },
-    { path: '/trains', label: 'أسطول القطارات' },
-    { path: '/wilayas', label: 'الولايات' },
-    { path: '/admin-users', label: 'حسابات الأدمن' },
-    { path: '/lines', label: 'الخطوط والمسارات' },
-    { path: '/trips', label: 'الرحلات المُبرمجة' },
-    { path: '/scheduler', label: 'جدول مواعيد الرحلات' },
-    { path: '/notices', label: 'الإشعارات والتنبيهات' },
-    { path: '/ticket-config', label: 'أسعار التذاكر والحاسبة' },
-  ];
+const allNavItems = [
+  { path: '/', label: 'الرئيسية والإحصائيات' },
+  { path: '/stations', label: 'المحطات' },
+  { path: '/trains', label: 'أسطول القطارات' },
+  { path: '/wilayas', label: 'الولايات' },
+  { path: '/admin-users', label: 'حسابات الأدمن', superAdminOnly: true },
+  { path: '/lines', label: 'الخطوط والمسارات' },
+  { path: '/trips', label: 'الرحلات المُبرمجة' },
+  { path: '/scheduler', label: 'جدول مواعيد الرحلات' },
+  { path: '/notices', label: 'الإشعارات والتنبيهات' },
+  { path: '/ticket-config', label: 'أسعار التذاكر والحاسبة' },
+];
 
+const navItems = allNavItems.filter((item) => !item.superAdminOnly || user?.role === 'super_admin');
   const getCurrentTitle = () => {
     const item = navItems.find((n) => n.path === location.pathname);
     return item ? item.label : 'لوحة التحكم';

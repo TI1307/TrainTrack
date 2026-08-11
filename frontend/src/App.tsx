@@ -45,6 +45,39 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   return <Layout>{children}</Layout>;
 };
+const SuperAdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading, user } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          background: '#0A1428',
+          color: '#94A3B8',
+          fontFamily: 'Tajawal, sans-serif',
+          direction: 'rtl',
+        }}
+      >
+        <span className="spinner" style={{ width: '32px', height: '32px', marginLeft: '0.75rem' }}></span>
+        <span>جاري التحقق من تسجيل الدخول...</span>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user?.role !== 'super_admin') {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Layout>{children}</Layout>;
+};
 
 function AppRoutes() {
   return (
@@ -54,9 +87,9 @@ function AppRoutes() {
        <Route
         path="/admin-users"
         element={
-          <ProtectedRoute>
-            <AdminUsers />
-          </ProtectedRoute>
+          <SuperAdminRoute>
+      <AdminUsers />
+    </SuperAdminRoute>
         }
       />
 

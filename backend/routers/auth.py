@@ -50,7 +50,7 @@ def require_super_admin(current_admin: models.Admin = Depends(get_current_admin)
 
 @router.get("/me")
 def read_me(current_admin: models.Admin = Depends(get_current_admin)):
-    return {"id": current_admin.id, "username": current_admin.username}
+    return {"id": current_admin.id, "username": current_admin.username ,"role" :current_admin.role}
 
 
 @router.post("/logout")

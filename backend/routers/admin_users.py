@@ -53,7 +53,7 @@ async def create_admin (admin :adminCreate , db: Session=Depends(get_db) ,curren
 #POST / the admin put the password 
 
 @router.post ("/set-password" )
-def create_password (admin :adminPasswordCreate , db: Session=Depends(get_db) ):
+def create_password (admin :adminPasswordCreate , db: Session=Depends(get_db) ,current_admin : models.Admin=Depends(require_super_admin) ):
     invite_token_hash=hash_invite_token (admin.token) 
     update_admin=db.query(models.Admin).filter(models.Admin.invite_token_hash==invite_token_hash).first()
     if   not update_admin or update_admin.invite_token_expires_at < datetime.now (timezone.utc).replace(tzinfo=None) :

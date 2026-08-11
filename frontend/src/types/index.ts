@@ -4,6 +4,7 @@ export type TripStatus = 'working' | 'not_working';
 export type TripType = 'inter_Wilaya' | 'intra_Wilaya';
 export type TicketClassType = 'first_class' | 'economy' | "intra_wilaya";
 export type AccountStatus='pending'| 'active' |'disabled';
+export type AdminRole= 'super_admin' | 'admin';
 
 export interface Station {
   id: number;
@@ -29,6 +30,7 @@ export interface AdminUser {
   email: string;
   status:AccountStatus;
   token:string;
+  role:AdminRole;
 }
 
 export interface Line {
