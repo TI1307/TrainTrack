@@ -1,14 +1,14 @@
 import React, { useRef, useMemo, useState, useEffect } from "react";
 import { View, Text, StyleSheet, Pressable, ActivityIndicator, FlatList } from "react-native";
-import MapView from "react-native-maps";
+import MapView, { Polyline, Marker } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import TrainCard from "../components/TrainCard";
 import { get_notices, searchTrips } from "../api/passenger";
-import { getTripPath } from "../api/tracking";
+import { getTripPath, getLiveTrains, getTripGeometry  } from "../api/tracking";
 import { getTicketClasses, calculatePrice } from "../api/ticketConfig";
 import { mapTripToTrainCard } from "../utils/tripMappers";
-import type { TripSearchResult, Notice, StopStatus, PriceResponse } from "../types";
+import type { TripSearchResult, Notice, StopStatus, PriceResponse , TripGeometry, TrackingRead} from "../types";
 
 const NAVY = "#0B3D6B";
 const GREEN = "#2E9E5B";
@@ -45,6 +45,11 @@ export default function SearchResultsScreen({ from, to, fromStationId, toStation
   const [isLoadingPrice, setIsLoadingPrice] = useState(true);
   const [priceError, setPriceError] = useState<string | null>(null);
 
+  const [geometry, setGeometry] = useState<TripGeometry | null>(null);
+  const [liveTrains, setLiveTrains] = useState<TrackingRead[]>([]);
+  const currentTripId = liveTrains[0]?.trip_id ?? null;
+
+
   useEffect(() => {
     setIsLoadingTrips(true);
     setTripsError(null);
@@ -76,6 +81,33 @@ export default function SearchResultsScreen({ from, to, fromStationId, toStation
       .finally(() => setIsLoadingPrice(false));
   }, [fromStationId, toStationId, ticketClass]);
 
+useEffect(() => {
+  if (currentTripId === null) {
+    setGeometry(null);
+    return;
+  }
+  getTripGeometry(currentTripId)
+    .then(setGeometry)
+    .catch(() => setGeometry(null));
+}, [currentTripId]);
+
+// poll live positions independently, every 20s, cleaned up properly
+useEffect(() => {
+  let active = true;
+  const poll = () => {
+    getLiveTrains(fromStationId, toStationId)
+      .then((data) => { if (active) setLiveTrains(data); })
+      .catch(() => {});
+  };
+  poll();
+  const interval = setInterval(poll, 20000);
+  return () => {
+    active = false;
+    clearInterval(interval);
+  };
+}, [fromStationId, toStationId]);
+  
+
   const handleSelectTrain = (tripId: number) => {
     const idStr = String(tripId);
     setSelectedTrainId((prev) => (prev === idStr ? null : idStr));
@@ -89,9 +121,21 @@ export default function SearchResultsScreen({ from, to, fromStationId, toStation
   return (
     <View style={styles.container}>
       <MapView
-        style={styles.map}
-        initialRegion={{ latitude: 36.7538, longitude: 3.0588, latitudeDelta: 0.1, longitudeDelta: 0.1 }}
-      />
+  style={styles.map}
+  initialRegion={{ latitude: 36.7538, longitude: 3.0588, latitudeDelta: 0.1, longitudeDelta: 0.1 }}
+>
+  {geometry && (
+    <>
+      <Polyline coordinates={geometry.passed} strokeColor={GREEN} strokeWidth={4} />
+      <Polyline coordinates={geometry.remaining} strokeColor="#B0BEC5" strokeWidth={4} />
+    </>
+  )}
+  {liveTrains.map((t) => (
+    <Marker key={t.trip_id} coordinate={{ latitude: t.latitude, longitude: t.longitude }}>
+      <Ionicons name="train" size={22} color={NAVY} />
+    </Marker>
+  ))}
+</MapView>
 
       <View style={styles.header}>
         <Text style={styles.headerText}>{to} ← {from}</Text>

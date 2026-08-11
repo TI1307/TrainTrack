@@ -71,3 +71,6 @@ export type PriceResponse = {
   distance_km: number;
   price: number;
 };
+
+export type LatLng = { latitude: number; longitude: number };
+export type TripGeometry = { passed: LatLng[]; remaining: LatLng[] };
