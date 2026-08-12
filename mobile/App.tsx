@@ -2,6 +2,7 @@ import {useState , useEffect} from "react";
 import SplashScreen from "./screens/SplashScreen";
 import HomeScreen from "./screens/HomeScreen";
 import SearchResultsScreen from "./screens/SearchResultsScreen";
+import { Float } from "react-native/Libraries/Types/CodegenTypes";
 
 type SearchParams = {
   from: string;
@@ -9,6 +10,8 @@ type SearchParams = {
   date: Date;
   fromStationId: number;
   toStationId: number;
+  fromLatitude: Float;
+  fromLongitude: Float ;
   ticketClass: "first_class" | "economy" | "intra_wilaya";
 };
 export default function App(){
@@ -32,6 +35,8 @@ export default function App(){
   to={searchParams.to}
   fromStationId={searchParams.fromStationId}
   toStationId={searchParams.toStationId}
+  fromLatitude={searchParams.fromLatitude}
+  fromLongitude={searchParams.fromLongitude}
   date={searchParams.date}
   ticketClass={searchParams.ticketClass}
   onBack={() => setScreen("home")}

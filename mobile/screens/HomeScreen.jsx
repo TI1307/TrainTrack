@@ -378,6 +378,8 @@ export default function HomeScreen({ onSearch }) {
             onSearch({
               fromStationId,
               toStationId,
+              fromLatitude: fromStation.latitude,
+              fromLongitude: fromStation.longitude,
               from: fromSearch,
               to: toSearch,
               date: days[selectedDayIndex].date,
