@@ -68,10 +68,21 @@ export default function SearchResultsScreen({
   }, [currentTripId]); // fires once when a train starts being "current" — not on every position update
 
   useEffect(() => {
+    const current = liveTrains[0];
+    if (!current) return;
+    animatedCoord.setValue({
+      latitude: current.latitude,
+      longitude: current.longitude,
+      latitudeDelta: 0,
+      longitudeDelta: 0,
+    });
+  }, [liveTrains]);
+
+  useEffect(() => {
     const timer = setTimeout(() => setTrackTrainIcon(false), 1000);
     return () => clearTimeout(timer);
   }, []);
-  // starts at the REAL from-station, not a hardcoded fallback
+
   const animatedCoord = useRef(
     new AnimatedRegion({ latitude: fromLatitude, longitude: fromLongitude, latitudeDelta: 0, longitudeDelta: 0 })
   ).current;
