@@ -1,14 +1,16 @@
 // frontend/pages/Lines.tsx
 import { useEffect, useState } from 'react';
 import type { Line, LineStation, LineGeometry, Station } from '../src/types';
-import {getStations } from '../api/station';
-import {getLineGeometry ,createLineGeometry ,updateLineGeometry,deleteLineGeometry}from '../api/line_geometry';
-import {getLineStations ,createLineStation ,updateLineStation,deleteLineStation}from '../api/line_station';
-import {getLines ,createLine ,updateLine,deleteLine}from '../api/line';
+import { getStations } from '../api/station';
+import { getLineGeometry, createLineGeometry, updateLineGeometry, deleteLineGeometry } from '../api/line_geometry';
+import { getLineStations, createLineStation, updateLineStation, deleteLineStation } from '../api/line_station';
+import { getLines, createLine, updateLine, deleteLine } from '../api/line';
 
 import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
 import { ErrorMessage } from '../src/components/common/ErrorMessage';
+import { GeometryMapPicker } from '../src/components/common/GeometryMapPicker';
+
 
 export default function Lines() {
   const [lines, setLines] = useState<Line[]>([]);
@@ -47,7 +49,7 @@ export default function Lines() {
 
   const fetchBaseData = async () => {
     try {
-      const [lnList, stList] = await Promise.all([getLines(),getStations()]);
+      const [lnList, stList] = await Promise.all([getLines(), getStations()]);
       setLines(lnList);
       setStations(stList);
       if (lnList.length > 0 && selectedLineId === null) {
@@ -136,12 +138,13 @@ export default function Lines() {
     if (!currentSelectedLine) return;
     try {
       if (editingStationLink) {
-        await updateLineStation(currentSelectedLine.id, editingStationLink.station_id, {order: Number(stationLinkForm.order),
-            distance: Number(stationLinkForm.distance)
+        await updateLineStation(currentSelectedLine.id, editingStationLink.station_id, {
+          order: Number(stationLinkForm.order),
+          distance: Number(stationLinkForm.distance)
         });
       } else {
         await createLineStation({
-          line_name:currentSelectedLine.name,
+          line_name: currentSelectedLine.name,
           station_name: stationLinkForm.station_name,
           order: Number(stationLinkForm.order),
           distance: Number(stationLinkForm.distance),
@@ -186,7 +189,7 @@ export default function Lines() {
         });
       } else {
         await createLineGeometry({
-          line_name:currentSelectedLine.name,
+          line_name: currentSelectedLine.name,
           sequence: Number(geometryForm.sequence),
           latitude: Number(geometryForm.latitude),
           longitude: Number(geometryForm.longitude),
@@ -553,67 +556,27 @@ export default function Lines() {
               </div>
 
               {/* Visual Map Route Preview */}
-              <div
-                style={{
-                  background: '#0F172A',
-                  border: '1px solid rgba(148, 163, 184, 0.25)',
-                  borderRadius: '14px',
-                  padding: '1.25rem',
-                  marginBottom: '1.5rem',
+              <GeometryMapPicker
+                points={lineGeometry}
+                lineName={currentSelectedLine.name}
+                onAddPoint={async (lat, lng, sequence) => {
+                  try {
+                    await createLineGeometry({
+                      line_name: currentSelectedLine.name,
+                      sequence,
+                      latitude: lat,
+                      longitude: lng,
+                    });
+                    await fetchLineSubDetails(currentSelectedLine.id);
+                  } catch (err: unknown) {
+                    setError(err instanceof Error ? err.message : 'فشل حفظ النقطة');
+                  }
                 }}
-              >
-                <div style={{ color: '#94A3B8', fontSize: '0.8rem', marginBottom: '0.75rem', fontWeight: 600 }}>
-                  🗺️ المعاينة البصرية لمسار الخط على الخريطة:
-                </div>
-                <div
-                  style={{
-                    height: '140px',
-                    background: 'radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%)',
-                    borderRadius: '10px',
-                    border: '1px dashed rgba(148, 163, 184, 0.3)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'relative',
-                    overflow: 'hidden',
-                  }}
-                >
-                  {lineGeometry.length > 1 ? (
-                    <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0 }}>
-                      <polyline
-                        fill="none"
-                        stroke="#3B82F6"
-                        strokeWidth="4"
-                        strokeDasharray="6 4"
-                        points={lineGeometry
-                          .map((_, i) => {
-                            const x = 50 + (i / (lineGeometry.length - 1)) * 80;
-                            const y = 30 + Math.sin(i) * 20 + (i % 2 === 0 ? 15 : 35);
-                            return `${x}%,${y}%`;
-                          })
-                          .join(' ')}
-                      />
-                      {lineGeometry.map((pt, i) => {
-                        const x = 50 + (i / (lineGeometry.length - 1)) * 80;
-                        const y = 30 + Math.sin(i) * 20 + (i % 2 === 0 ? 15 : 35);
-                        return (
-                          <circle
-                            key={pt.id}
-                            cx={`${x}%`}
-                            cy={`${y}%`}
-                            r="6"
-                            fill="#60A5FA"
-                            stroke="#FFFFFF"
-                            strokeWidth="2"
-                          />
-                        );
-                      })}
-                    </svg>
-                  ) : (
-                    <div style={{ color: '#64748B', fontSize: '0.875rem' }}>يجب إدخال نقطتين جغرافيين على الأقل لإظهار رسم الخط البياني</div>
-                  )}
-                </div>
-              </div>
+                onDeletePoint={(id) => {
+                  setDeletingType('geometry');
+                  setDeletingTarget({ id });
+                }}
+              />
 
               <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(148, 163, 184, 0.2)', borderRadius: '14px', overflow: 'hidden' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', fontSize: '0.875rem' }}>
@@ -842,8 +805,8 @@ export default function Lines() {
           deletingType === 'line'
             ? 'هل أنت تأكد من رغبتك في حذف الخط بأكمله ومحطاته ونقاطه؟'
             : deletingType === 'station'
-            ? 'هل أنت تأكد من إزالة هذه المحطة من الخط؟'
-            : 'هل أنت تأكد من حذف نقطة المسار هذه؟'
+              ? 'هل أنت تأكد من إزالة هذه المحطة من الخط؟'
+              : 'هل أنت تأكد من حذف نقطة المسار هذه؟'
         }
         isLoading={isDeleting}
       />
