@@ -2,6 +2,7 @@
 backend/.venv/
 backend/__pycache__/
 backend/*.pyc
+backend/.env
 # React (frontend)
 frontend/node_modules/
 frontend/dist/
@@ -14,6 +15,7 @@ frontend/pnpm-debug.log*
 frontend/lerna-debug.log*
 frontend/logs
 frontend/*.log
+frontend/.env
 
 # React Native (Expo)
 mobile/node_modules/

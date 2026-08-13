@@ -1,6 +1,7 @@
-import axios from 'axios' ;
+import axios from 'axios';
 
-const client = axios.create ({
-    baseURL:"http://10.215.208.59:8000",
+const client = axios.create({
+  baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,
 });
-export default client ;
+
+export default client;
