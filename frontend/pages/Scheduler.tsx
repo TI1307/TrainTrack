@@ -11,6 +11,7 @@ import { DataTable, type Column } from '../src/components/common/DataTable';
 import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
 import { ErrorMessage } from '../src/components/common/ErrorMessage';
+import { getErrorMessage, type ApiError } from '../src/utils/errors';
 
 export default function SchedulerPage() {
   const [lines, setLines] = useState<Line[]>([]);
@@ -23,7 +24,7 @@ export default function SchedulerPage() {
 
   const [schedulers, setSchedulers] = useState<Scheduler[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -55,7 +56,7 @@ export default function SchedulerPage() {
         setSelectedLineId(lnList[0].id);
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'خطأ في تحميل بيانات الجدولة الأساسية');
+      setError(getErrorMessage(err, 'خطأ في تحميل بيانات الجدولة الأساسية'));
     }
   };
 
@@ -88,7 +89,7 @@ export default function SchedulerPage() {
       const data = await getSchedulers(tripId);
       setSchedulers(data);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'خطأ في تحميل مواعيد الرحلة');
+      setError(getErrorMessage(err, 'خطأ في تحميل مواعيد الرحلة'));
     } finally {
       setIsLoading(false);
     }
@@ -152,7 +153,7 @@ export default function SchedulerPage() {
       setIsModalOpen(false);
       await fetchSchedulers(selectedTripId);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حفظ التوقيت');
+      setError(getErrorMessage(err, 'فشل حفظ التوقيت'));
     } finally {
       setIsSaving(false);
     }
@@ -167,7 +168,7 @@ export default function SchedulerPage() {
       setDeletingId(null);
       await fetchSchedulers(selectedTripId);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حذف التوقيت');
+      setError(getErrorMessage(err, 'فشل حذف التوقيت'));
     } finally {
       setIsDeleting(false);
     }
@@ -358,6 +359,7 @@ export default function SchedulerPage() {
         title={editingScheduler ? 'تعديل توقيت المحطة' : 'إضافة موعد محطة للرحلة'}
       >
         <form onSubmit={handleSubmit}>
+          <ErrorMessage error={error} onClear={() => setError(null)} />
           <div style={{ marginBottom: '1.25rem' }}>
             <label style={{ display: 'block', fontSize: '0.875rem', color: '#CBD5E1', marginBottom: '0.375rem' }}>
               المحطة (station_id)
