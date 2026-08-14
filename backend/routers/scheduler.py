@@ -34,20 +34,25 @@ def create_scheduler(scheduler :schedulerCreate ,db:Session=Depends(get_db) , cu
     station=db.query(models.Station).filter(models.Station.id== scheduler.station_id).first()
     if not station:
                 raise HTTPException (status_code=404 , detail="لا توجد هذه المحطة")
-    existing=db.query(models.Scheduler).filter(models.Scheduler.trip_id== scheduler.trip_id ,models.Scheduler.order== scheduler.order).first()
     existing_order = db.query(models.Scheduler).filter(
     models.Scheduler.trip_id == scheduler.trip_id,
     models.Scheduler.order == scheduler.order
-).first()
-if existing_order:
-    raise HTTPException(status_code=409, detail="يوجد توقف بنفس الترتيب لهذه الرحلة")
+    ).first()
+    if existing_order:
+         raise HTTPException(status_code=409, detail="يوجد توقف بنفس الترتيب لهذه الرحلة")
 
-existing_station = db.query(models.Scheduler).filter(
+    existing_station = db.query(models.Scheduler).filter(
     models.Scheduler.trip_id == scheduler.trip_id,
     models.Scheduler.station_id == scheduler.station_id
-).first()
-if existing_station:
-    raise HTTPException(status_code=409, detail="هذه المحطة موجودة مسبقًا في هذه الرحلة")
+    ).first()
+    if existing_station:
+           raise HTTPException(status_code=409, detail="هذه المحطة موجودة مسبقًا في هذه الرحلة")
+    existing_time = db.query(models.Scheduler).filter(
+    models.Scheduler.trip_id == scheduler.trip_id,
+    models.Scheduler.arrival_time == scheduler.arrival_time
+    ).first()
+    if existing_time:
+            raise HTTPException(status_code=409, detail="يوجد توقف آخر بنفس وقت الوصول لهذه الرحلة")
     
     new_scheduler=models.Scheduler(
            trip_id= trip.id ,
