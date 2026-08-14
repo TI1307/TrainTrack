@@ -1,26 +1,35 @@
 import os
+import httpx
 from dotenv import load_dotenv
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 
 load_dotenv()
 
-conf = ConnectionConfig(
-    MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
-    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
-    MAIL_FROM=os.getenv("MAIL_FROM"),
-    MAIL_SERVER=os.getenv("MAIL_SERVER"),
-    MAIL_PORT=int(os.getenv("MAIL_PORT")),
-    MAIL_STARTTLS=True,
-    MAIL_SSL_TLS=False,
-    USE_CREDENTIALS=True,
-)
+BREVO_API_KEY = os.getenv("BREVO_API_KEY")
+BREVO_SENDER_EMAIL = os.getenv("BREVO_SENDER_EMAIL")
+BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
+
 
 async def send_invite_email(to_email: str, invite_link: str):
-    message = MessageSchema(
-        subject="دعوة للانضمام كمسؤول في TrainTtrack",
-        recipients=[to_email],
-        body=f"تمت دعوتك للانضمام كمسؤول. يمكنك تعيين كلمة المرور الخاصة بك من خلال الرابط التالي : {invite_link}",
-        subtype=MessageType.plain,
-    )
-    fm = FastMail(conf)
-    await fm.send_message(message)
+    payload = {
+        "sender": {"name": "TrainTrack", "email": BREVO_SENDER_EMAIL},
+        "to": [{"email": to_email}],
+        "subject": "دعوة للانضمام كمسؤول في TrainTrack",
+        "textContent": (
+            f"تمت دعوتك للانضمام كمسؤول. يمكنك تعيين كلمة المرور الخاصة بك "
+            f"من خلال الرابط التالي : {invite_link}"
+        ),
+    }
+    headers = {
+        "api-key": BREVO_API_KEY,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+
+    async with httpx.AsyncClient(timeout=10) as client:
+        response = await client.post(BREVO_API_URL, json=payload, headers=headers)
+
+    if response.status_code >= 400:
+        # Surface the real Brevo error instead of failing silently
+        raise Exception(f"Brevo email failed ({response.status_code}): {response.text}")
+
+    return response.json()
