@@ -58,7 +58,7 @@ def create_scheduler(scheduler :schedulerCreate ,db:Session=Depends(get_db) , cu
     models.Scheduler.departure_time == scheduler.departure_time
     ).first()
     if existing_departure_time:
-            raise HTTPException(status_code=409, detail="يوجد توقف آخر بنفس وقت الوصول لهذه الرحلة")
+            raise HTTPException(status_code=409, detail="يوجد توقف آخر بنفس وقت  الانطلاق لهذه الرحلة")
     
     new_scheduler=models.Scheduler(
            trip_id= trip.id ,
