@@ -9,6 +9,7 @@ import { getTripPath, getLiveTrains, getTripGeometry } from "../api/tracking";
 import { getTicketClasses, calculatePrice } from "../api/ticketConfig";
 import { mapTripToTrainCard } from "../utils/tripMappers";
 import type { TripSearchResult, Notice, StopStatus, PriceResponse, TripGeometry, TrackingRead } from "../types";
+import { useIsOnline } from "../hooks/useIsOnline";
 
 const NAVY = "#0B3D6B";
 const GREEN = "#2E9E5B";
@@ -35,6 +36,7 @@ function extractErrorMessage(err: any, fallback: string): string {
 export default function SearchResultsScreen({
   from, to, fromStationId, toStationId, fromLatitude, fromLongitude, date, ticketClass, onBack,
 }: SearchResultParam) {
+  const isOnline = useIsOnline();
   const sheetRef = useRef(null);
   const snapPoints = useMemo(() => ["25%", "40%", "70%", "90%"], []);
   const [selectedTrainId, setSelectedTrainId] = useState<string | null>(null);
@@ -189,6 +191,12 @@ export default function SearchResultsScreen({
         </Pressable>
       </View>
 
+      {!isOnline && (
+  <View style={styles.offlineBanner}>
+    <Text style={styles.offlineText}>لا يوجد اتصال بالإنترنت — يرجى الاتصال لعرض بيانات محدثة</Text>
+  </View>
+)}
+
       {notices.length > 0 && !noticesDismissed && (
         <View style={styles.noticeCard}>
           <View style={styles.noticeTitleRow}>
@@ -219,7 +227,7 @@ export default function SearchResultsScreen({
       <BottomSheet ref={sheetRef} index={1} snapPoints={snapPoints}>
         <BottomSheetFlatList
           data={isLoadingTrips || tripsError ? [] : trips}
-          keyExtractor={(item) => String(item.trip_id)}
+          keyExtractor={(item: TripSearchResult) => String(item.trip_id)}
           contentContainerStyle={styles.sheetContent}
           ListHeaderComponent={
             <View>
@@ -245,7 +253,7 @@ export default function SearchResultsScreen({
               <Text style={styles.emptyText}>لا توجد رحلات متاحة بين هاتين المحطتين</Text>
             )
           }
-          renderItem={({ item }) => {
+          renderItem={({ item }: { item: TripSearchResult }) => {
             const train = mapTripToTrainCard(item, from, to, pathsById[item.trip_id]);
             return (
               <TrainCard
@@ -283,4 +291,19 @@ const styles = StyleSheet.create({
   trainMarkerWrapper: { width: 44, height: 44, justifyContent: "center", alignItems: "center" },
   trainMarkerGlow: { position: "absolute", width: 44, height: 44, borderRadius: 22, backgroundColor: "rgba(37,99,235,0.30)" },
   trainMarkerCircle: { width: 28, height: 28, borderRadius: 14, backgroundColor: ICON_BLUE, justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: "#fff" },
+  offlineBanner: {
+  backgroundColor: "#FDECEA",
+  borderRadius: 10,
+  paddingVertical: 10,
+  paddingHorizontal: 14,
+  marginBottom: 12,
+  borderWidth: 1,
+  borderColor: "#F5C6C2",
+},
+offlineText: {
+  color: "#C0392B",
+  fontSize: 12,
+  fontWeight: "600",
+  textAlign: "center",
+},
 });
