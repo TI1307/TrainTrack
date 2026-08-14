@@ -204,6 +204,7 @@ export default function Wilayas() {
         title={editingWilaya ? 'تعديل اسم الولاية' : 'إضافة ولاية جديدة'}
       >
         <form onSubmit={handleSubmit}>
+          <ErrorMessage error={error} onClear={() => setError(null)} />
           <div style={{ marginBottom: '1.5rem' }}>
             <label style={{ display: 'block', fontSize: '0.875rem', color: '#CBD5E1', marginBottom: '0.375rem' }}>
               اسم الولاية (name)

@@ -250,6 +250,7 @@ export default function Stations() {
         title={editingStation ? 'تعديل بيانات المحطة' : 'إضافة محطة جديدة'}
       >
         <form onSubmit={handleSubmit}>
+          <ErrorMessage error={error} onClear={() => setError(null)} />
           <div style={{ marginBottom: '1.25rem' }}>
             <label style={{ display: 'block', fontSize: '0.875rem', color: '#CBD5E1', marginBottom: '0.375rem' }}>
               اسم المحطة
