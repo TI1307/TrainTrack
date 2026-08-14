@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { Layout } from './components/common/Layout';
 
 import Login from '../pages/login';
-import SetPassword from '../pages/SetPassword';
+import SetPassword from '../pages/setPassword';
 import Dashboard from '../pages/Dashboard';
 import Stations from '../pages/Stations';
 import Trains from '../pages/Trains';
