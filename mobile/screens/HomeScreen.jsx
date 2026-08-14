@@ -1,7 +1,9 @@
-import React, { useState, useMemo , useEffect } from "react";
-import { Image, View, Text, TextInput, StyleSheet, Pressable, Keyboard, Modal, FlatList,ScrollView} from "react-native";
+import React, { useState, useMemo, useEffect } from "react";
+import { Image, View, Text, TextInput, StyleSheet, Pressable, Keyboard, Modal, FlatList, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import {getStations} from "../api/station"
+import { getStations } from "../api/station"
+import { useIsOnline } from "../hooks/useIsOnline";
+
 
 const NAVY = "#0B3D6B";
 const DAYS_COUNT = 10; // number upcoming days to show in the strip
@@ -42,25 +44,28 @@ function formatDate(d) {
 
 
 export default function HomeScreen({ onSearch }) {
+  const isOnline = useIsOnline();
   const [fromSearch, setFromSearch] = useState(""); // to store the station from name 
   const [toSearch, setToSearch] = useState(""); // to store the station to name 
   const [fromStationId, setFromStationId] = useState(""); // to store the station from id  
   const [toStationId, setToStationId] = useState(""); // to store the station to id 
-  const [errorMessage, setErrorMessage] = useState(""); 
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [fromStation, setFromStation] = useState(""); // to store the station from full object
   const [toStation, setToStation] = useState(""); // to store the station to the full object   
 
   const [activeField, setActiveField] = useState(null);
-// ticket class (first_class / economy / intra_wilaya) — only required for inter-wilaya trips
+  // ticket class (first_class / economy / intra_wilaya) — only required for inter-wilaya trips
   const [ticketClass, setTicketClass] = useState(null);
   const [classModalVisible, setClassModalVisible] = useState(false);
 
   const CLASS_OPTIONS = [
     { key: "first_class", label: "الدرجة الأولى" },
     { key: "economy", label: "اقتصادية" },
-    
+
   ];
+
+
 
   // is this trip between two different wilayas?
   const isInterWilaya =
@@ -69,14 +74,14 @@ export default function HomeScreen({ onSearch }) {
   const days = useMemo(() => generateDays(DAYS_COUNT), []);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0); // 0 = today
   const [dateModalVisible, setDateModalVisible] = useState(false);
-    //get function
-  const [stations , setStations]=useState([])
+  //get function
+  const [stations, setStations] = useState([])
   useEffect(() => {
-  getStations().then(data => {
-    console.log(data)
-    setStations(data);
-  });
-}, []);
+    getStations().then(data => {
+      console.log(data)
+      setStations(data);
+    });
+  }, []);
   const filteredFromStations = stations.filter((station) =>
     station.name.toLowerCase().includes(fromSearch.toLowerCase())
   );
@@ -84,19 +89,20 @@ export default function HomeScreen({ onSearch }) {
     station.name.toLowerCase().includes(toSearch.toLowerCase())
   );
 
-    // given the newly-picked "from" and "to" stations, decide whether to prompt for class
+  // given the newly-picked "from" and "to" stations, decide whether to prompt for class
   const checkClassPrompt = (from, to) => {
     if (from && to) { //Make sure both stations are selected
       if (from.wilaya_id !== to.wilaya_id) {
         setTicketClass(null);
-        setClassModalVisible(true);}
+        setClassModalVisible(true);
+      }
       else {
         setTicketClass("intra_wilaya");
       }
     }
   };
 
-  
+
   const selectFrom = (station) => {
     setFromSearch(station.name);
     setFromStationId(station.id);
@@ -114,12 +120,12 @@ export default function HomeScreen({ onSearch }) {
     Keyboard.dismiss();
     checkClassPrompt(fromStation, station);
   };
-  
-  
+
+
   return (
     <Pressable style={styles.container} onPress={() => setActiveField(null)}>
-<Image source={require("../assets/rail-top-left.png")} style={styles.railTopLeft} />
-<Image source={require("../assets/rail-bottom-right.png")} style={styles.railBottomRight} />
+      <Image source={require("../assets/rail-top-left.png")} style={styles.railTopLeft} />
+      <Image source={require("../assets/rail-bottom-right.png")} style={styles.railBottomRight} />
       <View style={styles.card}>
         <Image
           source={require("../assets/trainlogo-transparent.png")}
@@ -128,7 +134,11 @@ export default function HomeScreen({ onSearch }) {
         />
         <Text style={styles.text}>مرحبا بك</Text>
         <Text style={styles.subtext}>ابحث عن رحلتك بسهولة</Text>
-
+        {!isOnline && (
+          <View style={styles.offlineBanner}>
+            <Text style={styles.offlineText}>لا يوجد اتصال بالإنترنت — يرجى الاتصال لعرض بيانات محدثة</Text>
+          </View>
+        )}
         {/* From */}
         <View style={styles.fieldBlock}>
           <View style={styles.fieldWrapper}>
@@ -160,20 +170,20 @@ export default function HomeScreen({ onSearch }) {
             />
           </View>
           {activeField === "from" && (
-           <ScrollView style={styles.list} keyboardShouldPersistTaps="handled" >
+            <ScrollView style={styles.list} keyboardShouldPersistTaps="handled" >
               {filteredFromStations.length === 0 ? (
-      <Text style={styles.noResult}>لا توجد محطة بهذا الاسم</Text>
-    ) : (
-              filteredFromStations.map((station) => (
-                <Pressable
-                  key={station.id}
-                  style={styles.item}
-                  onPress={() => selectFrom(station)}
-                >
-                  <Text>{station.name}</Text>
-                </Pressable>
-              ))
-            )
+                <Text style={styles.noResult}>لا توجد محطة بهذا الاسم</Text>
+              ) : (
+                filteredFromStations.map((station) => (
+                  <Pressable
+                    key={station.id}
+                    style={styles.item}
+                    onPress={() => selectFrom(station)}
+                  >
+                    <Text>{station.name}</Text>
+                  </Pressable>
+                ))
+              )
               }
             </ScrollView>
           )}
@@ -212,18 +222,18 @@ export default function HomeScreen({ onSearch }) {
           {activeField === "to" && (
             <ScrollView style={styles.list} keyboardShouldPersistTaps="handled" >
               {filteredToStations.length === 0 ? (
-               <Text style={styles.noResult}>لا توجد محطة بهذا الاسم</Text>
+                <Text style={styles.noResult}>لا توجد محطة بهذا الاسم</Text>
               ) : (
-              filteredToStations.map((station) => (
-                <Pressable
-                  key={station.id}
-                  style={styles.item}
-                  onPress={() => selectTo(station)}
-                >
-                  <Text>{station.name}</Text>
-                </Pressable>
-              ))
-            )}
+                filteredToStations.map((station) => (
+                  <Pressable
+                    key={station.id}
+                    style={styles.item}
+                    onPress={() => selectTo(station)}
+                  >
+                    <Text>{station.name}</Text>
+                  </Pressable>
+                ))
+              )}
             </ScrollView>
           )}
         </View>
@@ -260,7 +270,7 @@ export default function HomeScreen({ onSearch }) {
             style={styles.modalBackdrop}
             onPress={() => setDateModalVisible(false)}
           >
-            <Pressable style={styles.modalCard} onPress={() => {}}>
+            <Pressable style={styles.modalCard} onPress={() => { }}>
               <View style={styles.modalHeader}>
                 <Pressable onPress={() => setDateModalVisible(false)} hitSlop={8}>
                   <Ionicons name="close" size={20} color="#555" />
@@ -302,7 +312,7 @@ export default function HomeScreen({ onSearch }) {
             </Pressable>
           </Pressable>
         </Modal>
-                {/* Ticket class - only asked when the trip crosses wilayas */}
+        {/* Ticket class - only asked when the trip crosses wilayas */}
         <Modal
           visible={classModalVisible}
           transparent
@@ -313,7 +323,7 @@ export default function HomeScreen({ onSearch }) {
             style={styles.modalBackdrop}
             onPress={() => setClassModalVisible(false)}
           >
-            <Pressable style={styles.modalCard} onPress={() => {}}>
+            <Pressable style={styles.modalCard} onPress={() => { }}>
               <View style={styles.modalHeader}>
                 <Pressable onPress={() => setClassModalVisible(false)} hitSlop={8}>
                   <Ionicons name="close" size={20} color="#555" />
@@ -352,7 +362,7 @@ export default function HomeScreen({ onSearch }) {
             </Pressable>
           </Pressable>
         </Modal>
-             {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+        {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
         <Pressable
           style={[
             styles.button,
@@ -360,16 +370,16 @@ export default function HomeScreen({ onSearch }) {
           ]}
           disabled={isInterWilaya && !ticketClass}
           onPress={() => {
-              setErrorMessage("");
+            setErrorMessage("");
 
-              if (!fromStationId || !toStationId) {
-               setErrorMessage("الرجاء اختيار محطتي الانطلاق والوصول من القائمة");
+            if (!fromStationId || !toStationId) {
+              setErrorMessage("الرجاء اختيار محطتي الانطلاق والوصول من القائمة");
               return;
-              }
-              if (fromStationId === toStationId) {
-                setErrorMessage("لا يمكن أن تكون محطة الانطلاق والوصول نفسها");
-                 return;
-              }
+            }
+            if (fromStationId === toStationId) {
+              setErrorMessage("لا يمكن أن تكون محطة الانطلاق والوصول نفسها");
+              return;
+            }
             if (isInterWilaya && !ticketClass) {
               setClassModalVisible(true);
               return;
@@ -387,9 +397,9 @@ export default function HomeScreen({ onSearch }) {
             });
           }}
         >
-          
-        
-          
+
+
+
           <Text style={styles.buttonText}>إبحث</Text>
         </Pressable>
       </View>
@@ -463,7 +473,7 @@ const styles = StyleSheet.create({
   },
   list: {
     width: "100%",
-    maxHeight: 150, 
+    maxHeight: 150,
     borderWidth: 1,
     borderColor: "#eee",
     borderRadius: 8,
@@ -533,26 +543,41 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   railTopLeft: {
-  position: "absolute",
-  top: 0,
-  left: 0,
+    position: "absolute",
+    top: 0,
+    left: 0,
+  },
+  railBottomRight: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+  },
+  noResult: {
+    padding: 10,
+    color: "#999",
+    fontSize: 13,
+    textAlign: "center",
+  },
+  errorText: {
+    color: "#c0392b",
+    fontSize: 15,
+    textAlign: "center",
+    width: "100%",
+    marginTop: 20,
+  },
+  offlineBanner: {
+  backgroundColor: "#FDECEA",
+  borderRadius: 10,
+  paddingVertical: 10,
+  paddingHorizontal: 14,
+  marginBottom: 12,
+  borderWidth: 1,
+  borderColor: "#F5C6C2",
 },
-railBottomRight: {
-  position: "absolute",
-  bottom: 0,
-  right: 0,
-},
-noResult: {
-  padding: 10,
-  color: "#999",
-  fontSize: 13,
+offlineText: {
+  color: "#C0392B",
+  fontSize: 12,
+  fontWeight: "600",
   textAlign: "center",
-},
-errorText: {
-  color: "#c0392b",
-  fontSize: 15,
-  textAlign: "center",
-  width: "100%",
-  marginTop: 20,
 },
 });
