@@ -651,6 +651,7 @@ export default function Lines() {
       {/* Line Add/Edit Modal */}
       <Modal isOpen={isLineModalOpen} onClose={() => setIsLineModalOpen(false)} title={editingLine ? 'تعديل بيانات الخط' : 'إضافة خط جديد'}>
         <form onSubmit={handleLineSubmit}>
+            <ErrorMessage error={error} onClear={() => setError(null)} />
           <div style={{ marginBottom: '1.25rem' }}>
             <label style={{ display: 'block', fontSize: '0.875rem', color: '#CBD5E1', marginBottom: '0.375rem' }}>اسم الخط (name)</label>
             <input
@@ -703,6 +704,7 @@ export default function Lines() {
       {/* Station Link Modal */}
       <Modal isOpen={isStationModalOpen} onClose={() => setIsStationModalOpen(false)} title={editingStationLink ? 'تعديل ترتيب المحطة على الخط' : 'إضافة محطة للخط'}>
         <form onSubmit={handleStationLinkSubmit}>
+            <ErrorMessage error={error} onClear={() => setError(null)} />
           <div style={{ marginBottom: '1.25rem' }}>
             <label style={{ display: 'block', fontSize: '0.875rem', color: '#CBD5E1', marginBottom: '0.375rem' }}>المحطة المراد ربطها (station_name)</label>
             <select
@@ -752,6 +754,7 @@ export default function Lines() {
       {/* Line Geometry Modal */}
       <Modal isOpen={isGeometryModalOpen} onClose={() => setIsGeometryModalOpen(false)} title={editingGeometryPt ? 'تعديل نقطة مسار الجغرافيا' : 'إضافة نقطة جغرافية جديدة'}>
         <form onSubmit={handleGeometrySubmit}>
+          <ErrorMessage error={error} onClear={() => setError(null)} />
           <div style={{ marginBottom: '1.25rem' }}>
             <label style={{ display: 'block', fontSize: '0.875rem', color: '#CBD5E1', marginBottom: '0.375rem' }}>التسلسل (sequence)</label>
             <input
