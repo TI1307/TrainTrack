@@ -6,11 +6,11 @@ import { DataTable, type Column } from '../src/components/common/DataTable';
 import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
 import { ErrorMessage } from '../src/components/common/ErrorMessage';
-
+import { getErrorMessage, type ApiError } from '../src/utils/errors';
 export default function Wilayas() {
   const [wilayas, setWilayas] = useState<Wilaya[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,7 +28,7 @@ export default function Wilayas() {
       const data = await getWilayas();
       setWilayas(data);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'خطأ في تحميل بيانات الولايات');
+      setError(getErrorMessage(err, 'خطأ في تحميل بيانات الولايات'));
     } finally {
       setIsLoading(false);
     }
@@ -69,7 +69,7 @@ export default function Wilayas() {
       setIsModalOpen(false);
       await fetchWilayas();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حفظ الولاية');
+      setError(getErrorMessage(err, 'فشل حفظ الولاية'));
     } finally {
       setIsSaving(false);
     }
@@ -85,7 +85,7 @@ export default function Wilayas() {
       setSuccessMessage("لقد تم حذف الولاية بنجاح");
       await fetchWilayas();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حذف الولاية');
+      setError(getErrorMessage(err, 'فشل حذف الولاية'));
     } finally {
       setIsDeleting(false);
     }
