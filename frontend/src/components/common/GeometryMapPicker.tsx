@@ -44,7 +44,7 @@ function InvalidateOnShow() {
   return null;
 }
 
-export function GeometryMapPicker({ points, lineName, disabled, onAddPoint, onDeletePoint }: Props) {
+export function GeometryMapPicker({ points , disabled, onAddPoint, onDeletePoint }: Props) {
   const sorted = [...points].sort((a, b) => a.sequence - b.sequence);
   const center: [number, number] = sorted.length > 0
     ? [sorted[0].latitude, sorted[0].longitude]
