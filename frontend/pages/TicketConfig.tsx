@@ -8,6 +8,7 @@ import { Badge } from '../src/components/common/Badge';
 import { ErrorMessage } from '../src/components/common/ErrorMessage';
 import { getTicketClasses, createTicketClass, updateTicketClass, deleteTicketClass, calculatePrice } from '../api/ticketConfig';
 import { getStations } from '../api/station';
+import { getErrorMessage, type ApiError } from '../src/utils/errors';
 
 
 export default function TicketConfig() {
@@ -15,7 +16,7 @@ export default function TicketConfig() {
   const [stations, setStations] = useState<Station[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
 
   // Ticket Class Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,7 +54,7 @@ export default function TicketConfig() {
         setCalcTicketClassId(tcList[0].id);
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'خطأ في تحميل بيانات فئات التذاكر');
+      setError(getErrorMessage(err, 'خطأ في تحميل بيانات فئات التذاكر'));
     } finally {
       setIsLoading(false);
     }
@@ -91,7 +92,7 @@ export default function TicketConfig() {
       setIsModalOpen(false);
       await fetchInitialData();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حفظ فئة التذكرة');
+      setError(getErrorMessage(err, 'فشل حفظ فئة التذكرة'));
     } finally {
       setIsSaving(false);
     }
@@ -106,7 +107,7 @@ export default function TicketConfig() {
       setDeletingId(null);
       await fetchInitialData();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حذف فئة التذكرة');
+      setError(getErrorMessage(err, 'فشل حذف فئة التذكرة'));
     } finally {
       setIsDeleting(false);
     }
@@ -128,7 +129,7 @@ export default function TicketConfig() {
       });
       setCalcResult(res);
     } catch (err: unknown) {
-      setCalcError(err instanceof Error ? err.message : 'فشل حساب سعر التذكرة');
+      setCalcError(getErrorMessage(err, 'فشل حساب سعر التذكرة')as string);
     } finally {
       setIsCalculating(false);
     }
@@ -404,6 +405,7 @@ export default function TicketConfig() {
         title={editingClass ? 'تعديل سعر فئة التذكرة' : 'إضافة درجة تذكرة جديدة'}
       >
         <form onSubmit={handleSubmit}>
+          <ErrorMessage error={error} onClear={() => setError(null)} />
           <div style={{ marginBottom: '1.25rem' }}>
             <label style={{ display: 'block', fontSize: '0.875rem', color: '#CBD5E1', marginBottom: '0.375rem' }}>
               نوع الدرجة (classtype)
