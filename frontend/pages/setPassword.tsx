@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate , useSearchParams} from "react-router-dom";
 import {setAdminPassword} from "../api/adminUsers";
-
+import { getErrorMessage } from '../src/utils/errors';
 export default function SetPassword() {
   const navigate = useNavigate();
   //get the token value from the url 
@@ -63,7 +63,7 @@ export default function SetPassword() {
       setSuccessUsername(res.username);
       setTimeout(() => navigate('/login'), 6000);
     }catch(err){
-      setNotification({ type: "error", message: "فشل تعيين كلمة المرور، تحقق من صحة الرمز" });
+      setNotification({ type: "error", message: getErrorMessage(err, "فشل تعيين كلمة المرور، تحقق من صحة الرمز") as string });
     }finally{
       setIsLoading(false);
     }
