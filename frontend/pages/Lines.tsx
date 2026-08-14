@@ -10,6 +10,7 @@ import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
 import { ErrorMessage } from '../src/components/common/ErrorMessage';
 import { GeometryMapPicker } from '../src/components/common/GeometryMapPicker';
+import { getErrorMessage, type ApiError } from '../src/utils/errors';
 
 
 export default function Lines() {
@@ -21,7 +22,7 @@ export default function Lines() {
   const [lineStations, setLineStations] = useState<LineStation[]>([]);
   const [lineGeometry, setLineGeometry] = useState<LineGeometry[]>([]);
 
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
 
   // Line Modal
   const [isLineModalOpen, setIsLineModalOpen] = useState(false);
@@ -56,7 +57,7 @@ export default function Lines() {
         setSelectedLineId(lnList[0].id);
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'خطأ في تحميل الخطوط');
+      setError(getErrorMessage(err,  'خطأ في تحميل الخطوط'));
     }
   };
 
@@ -69,7 +70,7 @@ export default function Lines() {
       setLineStations(ls);
       setLineGeometry(lg);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'خطأ في تحميل تفاصيل الخط');
+      setError(getErrorMessage(err,  'خطأ في تحميل تفاصيل الخط'));
     }
   };
 
@@ -109,7 +110,7 @@ export default function Lines() {
       setIsLineModalOpen(false);
       await fetchBaseData();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حفظ الخط');
+      setError(getErrorMessage(err,  'فشل حفظ الخط'));
     }
   };
 
@@ -153,7 +154,7 @@ export default function Lines() {
       setIsStationModalOpen(false);
       await fetchLineSubDetails(currentSelectedLine.id);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حفظ محطة الخط');
+      setError(getErrorMessage(err,  'فشل حفظ محطة الخط'));
     }
   };
 
@@ -198,7 +199,7 @@ export default function Lines() {
       setIsGeometryModalOpen(false);
       await fetchLineSubDetails(currentSelectedLine.id);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حفظ نقطة المسار');
+      setError(getErrorMessage(err, 'فشل حفظ نقطة المسار'));
     }
   };
 
@@ -221,7 +222,7 @@ export default function Lines() {
       setDeletingType(null);
       setDeletingTarget(null);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل عملية الحذف');
+      setError(getErrorMessage(err, 'فشل عملية الحذف'));
     } finally {
       setIsDeleting(false);
     }
