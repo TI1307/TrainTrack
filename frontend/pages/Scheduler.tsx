@@ -64,17 +64,22 @@ export default function SchedulerPage() {
     fetchInitialData();
   }, []);
 
-  // When line changes, fetch its trips and set default trip
+
+// When line changes, fetch its trips and set default trip
   useEffect(() => {
     async function updateTrips() {
       if (selectedLineId !== null) {
-        const trps = await getTrips(selectedLineId);
-        setTripsForLine(trps);
-        if (trps.length > 0) {
-          setSelectedTripId(trps[0].id);
-        } else {
-          setSelectedTripId(null);
-          setSchedulers([]);
+        try {
+          const trps = await getTrips(selectedLineId);
+          setTripsForLine(trps);
+          if (trps.length > 0) {
+            setSelectedTripId(trps[0].id);
+          } else {
+            setSelectedTripId(null);
+            setSchedulers([]);
+          }
+        } catch (err: unknown) {
+          setError(getErrorMessage(err, 'خطأ في تحميل رحلات هذا الخط'));
         }
       }
     }
