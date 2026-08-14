@@ -47,11 +47,17 @@ def create_scheduler(scheduler :schedulerCreate ,db:Session=Depends(get_db) , cu
     ).first()
     if existing_station:
            raise HTTPException(status_code=409, detail="هذه المحطة موجودة مسبقًا في هذه الرحلة")
-    existing_time = db.query(models.Scheduler).filter(
+    existing_arrival_time = db.query(models.Scheduler).filter(
     models.Scheduler.trip_id == scheduler.trip_id,
     models.Scheduler.arrival_time == scheduler.arrival_time
     ).first()
-    if existing_time:
+    if existing_arrival_time:
+            raise HTTPException(status_code=409, detail="يوجد توقف آخر بنفس وقت الوصول لهذه الرحلة")
+    existing_departure_time = db.query(models.Scheduler).filter(
+    models.Scheduler.trip_id == scheduler.trip_id,
+    models.Scheduler.departure_time == scheduler.departure_time
+    ).first()
+    if existing_departure_time:
             raise HTTPException(status_code=409, detail="يوجد توقف آخر بنفس وقت الوصول لهذه الرحلة")
     
     new_scheduler=models.Scheduler(
