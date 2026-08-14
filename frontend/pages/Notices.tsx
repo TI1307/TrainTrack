@@ -10,6 +10,7 @@ import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
 import { Badge } from '../src/components/common/Badge';
 import { ErrorMessage } from '../src/components/common/ErrorMessage';
+import { getErrorMessage, type ApiError } from '../src/utils/errors';
 
 export default function Notices() {
   const [notices, setNotices] = useState<Notice[]>([]);
@@ -23,7 +24,7 @@ export default function Notices() {
   const [filterTripId, setFilterTripId] = useState<number | 'all'>('all');
 
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -56,7 +57,7 @@ export default function Notices() {
       if (stList.length > 0) setFormStationId(stList[0].id);
       if (trList.length > 0) setFormTripId(trList[0].id);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'خطأ في تحميل التبعيات');
+      setError(getErrorMessage(err, 'خطأ في تحميل التبعيات'));
     }
   };
 
@@ -72,7 +73,7 @@ export default function Notices() {
       const data = await getNotices(Object.keys(filter).length > 0 ? filter : undefined);
       setNotices(data);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'خطأ في تحميل الإشعارات والتنبيهات');
+      setError(getErrorMessage(err, 'خطأ في تحميل الإشعارات والتنبيهات'));
     } finally {
       setIsLoading(false);
     }
@@ -135,7 +136,7 @@ export default function Notices() {
       setIsModalOpen(false);
       await fetchNotices();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حفظ الإشعار');
+      setError(getErrorMessage(err, 'فشل حفظ الإشعار'));
     } finally {
       setIsSaving(false);
     }
@@ -150,7 +151,7 @@ export default function Notices() {
       setDeletingId(null);
       await fetchNotices();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حذف الإشعار');
+      setError(getErrorMessage(err, 'فشل حذف الإشعار'));
     } finally {
       setIsDeleting(false);
     }
@@ -327,6 +328,7 @@ export default function Notices() {
         title={editingNotice ? `تعديل التنبيه #${editingNotice.id}` : 'إنشاء إشعار أو تنبيه جديد'}
       >
         <form onSubmit={handleSubmit}>
+          <ErrorMessage error={error} onClear={() => setError(null)} />
           {!editingNotice ? (
             <>
               {/* Target Type Selector */}
