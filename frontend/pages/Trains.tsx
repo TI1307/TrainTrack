@@ -6,11 +6,12 @@ import { DataTable, type Column } from '../src/components/common/DataTable';
 import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
 import { ErrorMessage } from '../src/components/common/ErrorMessage';
+import { getErrorMessage, type ApiError } from '../src/utils/errors';
 
 export default function Trains() {
   const [trains, setTrains] = useState<Train[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,7 +31,7 @@ export default function Trains() {
       const data = await getTrains();
       setTrains(data);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'خطأ في تحميل بيانات القطارات');
+      setError(getErrorMessage(err, 'خطأ في تحميل بيانات القطارات'));
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +72,7 @@ export default function Trains() {
       setIsModalOpen(false);
       await fetchTrains();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حفظ القطار');
+      setError(getErrorMessage(err, 'فشل حفظ القطار'));
     } finally {
       setIsSaving(false);
     }
@@ -87,7 +88,7 @@ export default function Trains() {
       setSuccessMessage("لقد تم حذف القطار بنجاح");
       await fetchTrains();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حذف القطار');
+      setError(getErrorMessage(err, 'فشل حذف القطار'));
     } finally {
       setIsDeleting(false);
     }
@@ -205,6 +206,7 @@ export default function Trains() {
         title={editingTrain ? 'تعديل الرقم التسلسلي للقطار' : 'إضافة قطار جديد للأسطول'}
       >
         <form onSubmit={handleSubmit}>
+           <ErrorMessage error={error} onClear={() => setError(null)} />
           <div style={{ marginBottom: '1.5rem' }}>
             <label style={{ display: 'block', fontSize: '0.875rem', color: '#CBD5E1', marginBottom: '0.375rem' }}>
               الرقم التسلسلي (serial_number)
