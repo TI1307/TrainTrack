@@ -1,5 +1,4 @@
 // frontend/pages/Dashboard.tsx
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StatCard } from '../src/components/common/StatCard';
 import { ErrorMessage } from '../src/components/common/ErrorMessage';

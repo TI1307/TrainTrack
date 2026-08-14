@@ -1,8 +1,6 @@
-// frontend/pages/login.tsx
 import { useState } from "react";
 import { useNavigate , useSearchParams} from "react-router-dom";
 import {setAdminPassword} from "../api/adminUsers";
-import { ErrorMessage } from '../src/components/common/ErrorMessage';
 
 export default function SetPassword() {
   const navigate = useNavigate();
