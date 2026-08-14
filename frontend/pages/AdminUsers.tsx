@@ -6,12 +6,11 @@ import { DataTable, type Column } from '../src/components/common/DataTable';
 import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
 import { ErrorMessage } from '../src/components/common/ErrorMessage';
-import axios from 'axios';
-
+import { getErrorMessage, type ApiError } from '../src/utils/errors';
 export default function AdminUsers() {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
 
   // Invite Admin Modal state
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
@@ -32,7 +31,7 @@ export default function AdminUsers() {
       const data = await getAdminUsers();
       setAdmins(data);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'خطأ في تحميل حسابات الأدمن');
+      setError(getErrorMessage(err,'خطأ في تحميل حسابات الأدمن'));
     } finally {
       setIsLoading(false);
     }
@@ -57,12 +56,8 @@ export default function AdminUsers() {
       setSuccessMessage('تم دعوة المشرف وإضافته بنجاح');
       await fetchAdmins();
     } catch (err: unknown) {
-    if (axios.isAxiosError(err) && err.response?.data?.detail) {
-      setError(err.response.data.detail);   // real backend message, "يوجد مسؤول بنفس..."
-    } else {
-      setError('فشل إرسال الدعوة');
-    }
-  } finally {
+      setError(getErrorMessage(err, 'فشل إرسال الدعوة'));
+    } finally {
     setIsInviting(false);
   }
   };
@@ -79,7 +74,7 @@ export default function AdminUsers() {
       setSuccessMessage('تم حذف حساب الأدمن بنجاح');
       await fetchAdmins();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حذف حساب الأدمن');
+      setError(getErrorMessage(err,'فشل حذف حساب الأدمن'));
     } finally {
       setIsDeleting(false);
     }
@@ -185,6 +180,7 @@ export default function AdminUsers() {
       {/* Invite Admin Modal */}
       <Modal isOpen={isInviteModalOpen} onClose={() => setIsInviteModalOpen(false)} title="دعوة مسؤول جديد (Invite Admin)">
         <form onSubmit={handleInviteSubmit}>
+          <ErrorMessage error={error} onClear={() => setError(null)} />
           <div style={{ marginBottom: '1.25rem' }}>
             <label style={{ display: 'block', fontSize: '0.875rem', color: '#CBD5E1', marginBottom: '0.375rem' }}>
               اسم المستخدم (username)
