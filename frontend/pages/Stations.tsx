@@ -7,13 +7,14 @@ import { DataTable, type Column } from '../src/components/common/DataTable';
 import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
 import { ErrorMessage } from '../src/components/common/ErrorMessage';
+import { getErrorMessage, type ApiError } from '../src/utils/errors';
 
 export default function Stations() {
   const [stations, setStations] = useState<Station[]>([]);
   const [wilayas, setWilayas] = useState<Wilaya[]>([]);
   const [selectedWilayaFilter, setSelectedWilayaFilter] = useState<number | 'all'>('all');
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,7 +36,7 @@ export default function Stations() {
         setFormData((prev) => ({ ...prev, wilaya_id: wlList[0].id }));
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'خطأ في تحميل البيانات');
+      setError(getErrorMessage(err, 'خطأ في تحميل البيانات'));
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +90,7 @@ export default function Stations() {
       setIsModalOpen(false);
       await fetchData();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حفظ المحطة');
+      setError(getErrorMessage(err, 'فشل حفظ المحطة'));
     } finally {
       setIsSaving(false);
     }
@@ -104,7 +105,7 @@ export default function Stations() {
       setDeletingId(null);
       await fetchData();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حذف المحطة');
+      setError(getErrorMessage(err, 'فشل حذف المحطة'));
     } finally {
       setIsDeleting(false);
     }
