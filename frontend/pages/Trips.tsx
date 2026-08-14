@@ -9,6 +9,7 @@ import { Modal } from '../src/components/common/Modal';
 import { ConfirmModal } from '../src/components/common/ConfirmModal';
 import { Badge } from '../src/components/common/Badge';
 import { ErrorMessage } from '../src/components/common/ErrorMessage';
+import { getErrorMessage, type ApiError } from '../src/utils/errors';
 
 export default function Trips() {
   const [lines, setLines] = useState<Line[]>([]);
@@ -17,7 +18,7 @@ export default function Trips() {
   const [trips, setTrips] = useState<Trip[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,7 +49,7 @@ export default function Trips() {
         setSelectedLineId(lnList[0].id);
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'خطأ في تحميل البيانات الأساسية');
+      setError(getErrorMessage(err,  'خطأ في تحميل البيانات الأساسية'));
     }
   };
 
@@ -59,7 +60,7 @@ export default function Trips() {
       const data = await getTrips(lineId);
       setTrips(data);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'خطأ في تحميل الرحلات للخط المحدد');
+      setError(getErrorMessage(err,  'خطأ في تحميل الرحلات للخط المحدد'));
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +121,7 @@ export default function Trips() {
       setIsModalOpen(false);
       await fetchTripsForLine(selectedLineId);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حفظ الرحلة');
+      setError(getErrorMessage(err,  'فشل حفظ الرحلة'));
     } finally {
       setIsSaving(false);
     }
@@ -135,7 +136,7 @@ export default function Trips() {
       setDeletingId(null);
       await fetchTripsForLine(selectedLineId);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'فشل حذف الرحلة');
+      setError(getErrorMessage(err,  'فشل حذف الرحلة'));
     } finally {
       setIsDeleting(false);
     }
@@ -302,6 +303,7 @@ export default function Trips() {
         title={editingTrip ? `تعديل الرحلة #${editingTrip.id}` : 'برمجة رحلة جديدة'}
       >
         <form onSubmit={handleSubmit}>
+           <ErrorMessage error={error} onClear={() => setError(null)} />
           {editingTrip && (
             <div
               style={{
