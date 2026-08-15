@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://192.168.100.3:5173" , "https://traintrack-frontend-two.vercel.app","http://localhost:8081","https://train-track-web.vercel.app/"],  # frontend's actual origin
+    allow_origins=["http://localhost:5173", "http://192.168.100.3:5173" , "https://traintrack-frontend-two.vercel.app","http://localhost:8081","https://train-track-web.vercel.app"],  # frontend's actual origin
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
