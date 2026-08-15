@@ -1,13 +1,8 @@
 # TrainTrack
 
-A Passenger Information System (PIS) for a railway network — built as a course project. It reproduces the core experience of a real rail passenger-information system (schedule lookup, route browsing, live train tracking, service announcements) on top of predefined reference data, with a native Arabic, right-to-left interface throughout.
+A Passenger Information System (PIS) for a railway network . It reproduces the core experience of a real rail passenger-information system (schedule lookup, route browsing, live train tracking, service announcements) on top of predefined reference data, with a native Arabic, right-to-left interface throughout.
 
 The current dataset is seeded from one real commuter line — **Agha–Zeralda** in Algiers, operated by SNTF — though the data model supports any number of wilayas, lines, and trains.
-
-**Prepared by:** Salhi Belkeis & Tifour Imene
-**Supervisor:** AOUACHE Mustapha
-
-Full requirements and design documentation: see `TrainTrack_SRS.pdf` .
 
 ---
 
