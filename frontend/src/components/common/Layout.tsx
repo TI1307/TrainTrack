@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import appIcon from '../../assets/icon.png';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -151,24 +152,18 @@ const navItems = allNavItems.filter((item) => !item.superAdminOnly || user?.role
             marginBottom: '1.25rem',
           }}
         >
-          <div
+          <img
+            src={appIcon}
+            alt="TrainTrack"
             style={{
               width: '40px',
               height: '40px',
               borderRadius: '10px',
-              background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              objectFit: 'cover',
               boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
-              color: '#fff',
-              fontWeight: 900,
-              fontSize: '0.95rem',
-              letterSpacing: '-1px',
+              display: 'block',
             }}
-          >
-            TT
-          </div>
+          />
           <div>
             <h1 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: '#F8FAFC', letterSpacing: '-0.5px' }}>
               TrainTrack
