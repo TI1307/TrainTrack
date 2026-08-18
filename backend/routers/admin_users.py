@@ -7,6 +7,7 @@ from routers.auth import require_super_admin , get_current_admin
 from security import hash_invite_token ,generate_token ,get_invite_expiry ,hash_password
 from utils.email import send_invite_email
 from datetime import timezone , datetime 
+from config import settings
 
 router=APIRouter (prefix ="/admin_users" , tags=["admin_users"])
 
@@ -46,7 +47,7 @@ async def create_admin (admin :adminCreate , db: Session=Depends(get_db) ,curren
     db.add(admin)
     db.commit()
     db.refresh(admin)
-    invite_link = f"http://localhost:5173/set-password?token={raw_token}"
+    invite_link = f"{settings.frontend_url}/set-password?token={raw_token}"
     await send_invite_email (admin.email , invite_link)
     return admin
 
